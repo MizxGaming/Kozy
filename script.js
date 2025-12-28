@@ -385,9 +385,12 @@ function initWidgets() {
     const switchBtns = document.querySelectorAll('.switch-btn');
     const widgetContents = document.querySelectorAll('.widget-content');
 
+    if (switchBtns.length === 0) return;
+
     switchBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const target = btn.dataset.widget;
+        btn.onclick = (e) => {
+            e.preventDefault();
+            const target = btn.getAttribute('data-widget');
             
             // Update buttons
             switchBtns.forEach(b => b.classList.remove('active'));
@@ -403,8 +406,11 @@ function initWidgets() {
             if (target === 'tree') renderTree();
             if (target === 'stars') renderStars();
             if (target === 'pet') updatePet();
-        });
+        };
     });
+
+    // Ensure initial tree render if it's the default
+    renderTree();
 }
 
 function renderStars() {
@@ -517,13 +523,16 @@ function initMixer() {
     
     sliders.forEach((slider, index) => {
         const type = types[index];
-        channels[type] = createNoise(type);
+        // Create noise only once
+        if (!channels[type]) {
+            channels[type] = createNoise(type);
+        }
 
-        slider.addEventListener('input', (e) => {
+        slider.oninput = (e) => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const vol = e.target.value / 100;
-            channels[type].gain.setTargetAtTime(vol * 0.5, audioCtx.currentTime, 0.1);
-        });
+            channels[type].gain.setTargetAtTime(vol * 0.4, audioCtx.currentTime, 0.1);
+        };
     });
 }
 

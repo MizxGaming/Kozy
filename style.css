@@ -156,30 +156,26 @@ body {
     border-color: var(--accent);
 }
 
-/* Calendar Panel (Left) */
-.calendar-panel {
+/* Left Column Layout */
+.left-column {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 80px); /* Fill available space minus dashboard padding */
+    gap: 20px;
+    height: calc(100vh - 80px); /* Fit within dashboard padding */
     max-height: 800px;
-    gap: 15px;
-    padding: 20px;
-    overflow: hidden;
 }
 
-.history-top {
+.history-panel {
     flex: 0 0 auto;
-    max-height: 45%;
-    overflow-y: auto;
+    padding: 20px;
 }
 
-.toys-bottom {
+.companion-panel {
     flex: 1;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    min-height: 0; 
-    border-top: 1px solid var(--glass-border);
-    padding-top: 15px;
+    min-height: 0;
 }
 
 .panel-header {
@@ -187,11 +183,13 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 8px;
 }
 
 .widget-switcher {
     display: flex;
-    gap: 5px;
+    gap: 4px;
 }
 
 .switch-btn {
@@ -206,6 +204,7 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    z-index: 10;
 }
 
 .switch-btn.active {
@@ -218,7 +217,7 @@ body {
     flex: 1;
     position: relative;
     width: 100%;
-    min-height: 150px;
+    min-height: 0;
 }
 
 .widget-content {
@@ -230,14 +229,11 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    opacity: 1;
-    transition: opacity 0.3s;
+    align-items: center;
 }
 
 .widget-content.hidden {
-    display: none;
-    opacity: 0;
-    pointer-events: none;
+    display: none !important;
 }
 
 /* Stars Widget */

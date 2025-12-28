@@ -574,11 +574,7 @@ function init() {
     fetchQuote();
     renderCalendar();
     updateTimerDisplay();
-    
-    // Explicitly load wallpaper
-    const savedBg = localStorage.getItem('cozyBg') || state.settings.bg;
-    setWallpaper(savedBg);
-
+    setWallpaper(state.settings.bg);
     fetchWeather();
     initWidgets();
     

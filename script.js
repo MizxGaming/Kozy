@@ -329,6 +329,7 @@ function renderCalendar() {
 
 // --- SETTINGS ---
 function setWallpaper(url) {
+    if (!url) return;
     document.body.style.backgroundImage = `url('${url}')`;
     state.settings.bg = url;
     localStorage.setItem('cozyBg', url);
@@ -573,7 +574,11 @@ function init() {
     fetchQuote();
     renderCalendar();
     updateTimerDisplay();
-    setWallpaper(state.settings.bg);
+    
+    // Explicitly load wallpaper
+    const savedBg = localStorage.getItem('cozyBg') || state.settings.bg;
+    setWallpaper(savedBg);
+
     fetchWeather();
     initWidgets();
     

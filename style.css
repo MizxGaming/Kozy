@@ -17,7 +17,7 @@ body {
     color: var(--text-primary);
     height: 100vh;
     overflow: hidden;
-    background-image: url('https://images.unsplash.com/photo-1518176258769-f227c798150e?q=80&w=2670&auto=format&fit=crop'); 
+    background-color: #111; /* Fallback color */
     background-size: cover;
     background-position: center;
     transition: background-image 0.5s ease-in-out;

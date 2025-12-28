@@ -4,9 +4,6 @@ const state = {
     sessions: JSON.parse(localStorage.getItem('cozySessions')) || [],
     settings: {
         name: localStorage.getItem('cozyName') || '',
-        city: localStorage.getItem('cozyCity') || '',
-        lat: localStorage.getItem('cozyLat') || null,
-        lon: localStorage.getItem('cozyLon') || null,
         bg: localStorage.getItem('cozyBg') || 'https://images.wallpapersden.com/image/download/anime-girl-looking-at-sky-scenery_bWlma2uUmZqaraWkpJRmbmdlrWZlbWU.jpg',
         activeWidget: localStorage.getItem('cozyActiveWidget') || 'tree',
         dynamicColors: true,
@@ -25,7 +22,6 @@ const elements = {
     clock: document.getElementById('clock'),
     date: document.getElementById('date'),
     greeting: document.getElementById('greeting'),
-    weather: document.getElementById('weather'),
     // Timer
     time: document.getElementById('time'),
     ring: document.querySelector('.progress-ring__circle'),
@@ -54,8 +50,6 @@ const elements = {
     presetBtns: document.querySelectorAll('.preset-btn'),
     bgUpload: document.getElementById('bg-upload'),
     userNameInput: document.getElementById('user-name'),
-    userCityInput: document.getElementById('user-city'),
-    geoBtn: document.getElementById('geo-btn'),
     // Modular Widgets
     switchBtns: document.querySelectorAll('.switch-btn'),
     widgetContents: document.querySelectorAll('.widget-content'),
@@ -88,48 +82,6 @@ function updateClockAndGreeting() {
     if (hour >= 18) greet = "Good Evening";
     elements.greeting.innerText = state.settings.name ? `${greet}, ${state.settings.name}` : greet;
 }
-
-async function fetchWeather() {
-    const { lat, lon } = state.settings;
-    if (!lat || !lon) return;
-
-    try {
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-        const data = await res.json();
-        const { temperature, weathercode } = data.current_weather;
-        
-        elements.weather.classList.remove('hidden');
-        elements.weather.querySelector('span').innerText = `${Math.round(temperature)}°C`;
-        
-        // Simple icon mapping
-        let icon = 'fa-cloud-sun';
-        if (weathercode === 0) icon = 'fa-sun';
-        if (weathercode > 0 && weathercode < 4) icon = 'fa-cloud-sun';
-        if (weathercode >= 45 && weathercode <= 48) icon = 'fa-smog';
-        if (weathercode >= 51 && weathercode <= 67) icon = 'fa-cloud-rain';
-        if (weathercode >= 71 && weathercode <= 77) icon = 'fa-snowflake';
-        if (weathercode >= 80 && weathercode <= 82) icon = 'fa-cloud-showers-heavy';
-        if (weathercode >= 95) icon = 'fa-bolt';
-        
-        elements.weather.querySelector('i').className = `fas ${icon}`;
-    } catch (e) {
-        console.error("Weather fetch failed", e);
-    }
-}
-
-function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-            state.settings.lat = pos.coords.latitude;
-            state.settings.lon = pos.coords.longitude;
-            localStorage.setItem('cozyLat', state.settings.lat);
-            localStorage.setItem('cozyLon', state.settings.lon);
-            fetchWeather();
-        });
-    }
-}
-
-elements.geoBtn.addEventListener('click', getLocation);
 
 
 // --- TODO & TASK SELECTOR ---
@@ -362,13 +314,6 @@ elements.userNameInput.addEventListener('input', (e) => {
     state.settings.name = e.target.value;
     localStorage.setItem('cozyName', state.settings.name);
     updateClockAndGreeting();
-});
-
-elements.userCityInput.value = state.settings.city;
-elements.userCityInput.addEventListener('input', (e) => {
-    state.settings.city = e.target.value;
-    localStorage.setItem('cozyCity', state.settings.city);
-    // Note: Weather updates might need a button or debounced fetch
 });
 
 elements.presetBtns.forEach(btn => {
@@ -607,7 +552,6 @@ function init() {
     renderCalendar();
     updateTimerDisplay();
     setWallpaper(state.settings.bg);
-    fetchWeather();
     initWidgets();
     
     try {

@@ -61,6 +61,9 @@ const elements = {
     treeDisplay: document.getElementById('tree-display'),
     cassette: document.querySelector('.cassette'),
     tapeLabel: document.getElementById('tape-label'),
+    starsDisplay: document.getElementById('stars-display'),
+    petDisplay: document.getElementById('pet-display'),
+    petStatus: document.getElementById('pet-status'),
 };
 
 
@@ -198,6 +201,7 @@ function finishTimer() {
     elements.startBtn.innerHTML = '<i class="fas fa-play"></i>';
     elements.status.innerText = "Session Complete";
     elements.cassette.classList.remove('spinning');
+    updatePet();
     
     saveSession(state.timer.initialMinutes, elements.taskSelect.value || "Just Focus");
     
@@ -212,6 +216,7 @@ elements.startBtn.addEventListener('click', () => {
         elements.startBtn.innerHTML = '<i class="fas fa-play"></i>';
         elements.status.innerText = "Paused";
         elements.cassette.classList.remove('spinning');
+        updatePet();
     } else {
         if (!state.timer.timeLeft || state.timer.timeLeft === state.timer.totalSeconds) {
             const parts = elements.time.innerText.split(':');
@@ -234,6 +239,7 @@ elements.startBtn.addEventListener('click', () => {
         elements.startBtn.innerHTML = '<i class="fas fa-pause"></i>';
         elements.status.innerText = elements.taskSelect.value ? `Focusing on: ${elements.taskSelect.value}` : "Focusing...";
         elements.cassette.classList.add('spinning');
+        updatePet();
     }
 });
 
@@ -245,6 +251,7 @@ elements.resetBtn.addEventListener('click', () => {
     elements.startBtn.innerHTML = '<i class="fas fa-play"></i>';
     elements.status.innerText = "Ready";
     elements.cassette.classList.remove('spinning');
+    updatePet();
 });
 
 elements.time.addEventListener('blur', () => {
@@ -385,8 +392,39 @@ elements.switchBtns.forEach(btn => {
         });
 
         if (target === 'tree') renderTree();
+        if (target === 'stars') renderStars();
+        if (target === 'pet') updatePet();
     });
 });
+
+function renderStars() {
+    const today = new Date().toISOString().split('T')[0];
+    const mins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
+    const starCount = Math.floor(mins / 5); // 1 star per 5 mins
+    
+    elements.starsDisplay.innerHTML = '';
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 3 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.animationDelay = `${Math.random() * 2}s`;
+        elements.starsDisplay.appendChild(star);
+    }
+}
+
+function updatePet() {
+    if (state.timer.running) {
+        elements.petDisplay.classList.add('active');
+        elements.petStatus.innerText = "Focusing with you!";
+    } else {
+        elements.petDisplay.classList.remove('active');
+        elements.petStatus.innerText = "Pet is resting...";
+    }
+}
 
 function renderTree() {
     const today = new Date().toISOString().split('T')[0];

@@ -108,13 +108,189 @@ body {
     height: 60vh;
 }
 
-/* Calendar Panel */
-.calendar-panel h3 {
-    margin-top: 0;
+/* Calendar Panel Header & Switcher */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
-    font-weight: 500;
     border-bottom: 1px solid var(--glass-border);
     padding-bottom: 10px;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+}
+
+.widget-switcher {
+    display: flex;
+    gap: 8px;
+}
+
+.switch-btn {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-secondary);
+    border: 1px solid var(--glass-border);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.switch-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.switch-btn.active {
+    background: var(--accent);
+    color: #222;
+    border-color: var(--accent);
+}
+
+.widget-display {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.widget-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.widget-content.hidden {
+    display: none;
+}
+
+/* Tree Widget */
+.tree-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+}
+
+.tree-stage {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.tree-msg {
+    font-size: 0.9rem;
+    color: var(--accent);
+}
+
+/* Tape Widget */
+.tape-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.cassette {
+    width: 200px;
+    height: 130px;
+    background: #333;
+    border-radius: 8px;
+    position: relative;
+    border: 4px solid #1a1a1a;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.reel {
+    width: 45px;
+    height: 45px;
+    background: #555;
+    border-radius: 50%;
+    position: absolute;
+    top: 30px;
+    border: 3px dashed #888;
+}
+
+.left-reel { left: 35px; }
+.right-reel { right: 35px; }
+
+.cassette.spinning .reel {
+    animation: spin 3s linear infinite;
+}
+
+.label {
+    position: absolute;
+    bottom: 15px;
+    left: 20px;
+    right: 20px;
+    height: 35px;
+    background: var(--accent);
+    color: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Mixer Widget */
+.mixer-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.mixer-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.mixer-row i {
+    width: 20px;
+    color: var(--accent);
+}
+
+.mixer-slider {
+    flex-grow: 1;
+    -webkit-appearance: none;
+    background: rgba(255,255,255,0.1);
+    height: 4px;
+    border-radius: 2px;
+    outline: none;
+}
+
+.mixer-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px;
+    height: 15px;
+    background: white;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--accent);
 }
 
 .mini-calendar {

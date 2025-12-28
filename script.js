@@ -55,6 +55,12 @@ const elements = {
     userNameInput: document.getElementById('user-name'),
     userCityInput: document.getElementById('user-city'),
     geoBtn: document.getElementById('geo-btn'),
+    // Modular Widgets
+    switchBtns: document.querySelectorAll('.switch-btn'),
+    widgetContents: document.querySelectorAll('.widget-content'),
+    treeDisplay: document.getElementById('tree-display'),
+    cassette: document.querySelector('.cassette'),
+    tapeLabel: document.getElementById('tape-label'),
 };
 
 
@@ -191,6 +197,7 @@ function finishTimer() {
     state.timer.running = false;
     elements.startBtn.innerHTML = '<i class="fas fa-play"></i>';
     elements.status.innerText = "Session Complete";
+    elements.cassette.classList.remove('spinning');
     
     saveSession(state.timer.initialMinutes, elements.taskSelect.value || "Just Focus");
     
@@ -204,6 +211,7 @@ elements.startBtn.addEventListener('click', () => {
         state.timer.running = false;
         elements.startBtn.innerHTML = '<i class="fas fa-play"></i>';
         elements.status.innerText = "Paused";
+        elements.cassette.classList.remove('spinning');
     } else {
         if (!state.timer.timeLeft || state.timer.timeLeft === state.timer.totalSeconds) {
             const parts = elements.time.innerText.split(':');
@@ -225,6 +233,7 @@ elements.startBtn.addEventListener('click', () => {
         state.timer.running = true;
         elements.startBtn.innerHTML = '<i class="fas fa-pause"></i>';
         elements.status.innerText = elements.taskSelect.value ? `Focusing on: ${elements.taskSelect.value}` : "Focusing...";
+        elements.cassette.classList.add('spinning');
     }
 });
 
@@ -235,6 +244,7 @@ elements.resetBtn.addEventListener('click', () => {
     updateTimerDisplay();
     elements.startBtn.innerHTML = '<i class="fas fa-play"></i>';
     elements.status.innerText = "Ready";
+    elements.cassette.classList.remove('spinning');
 });
 
 elements.time.addEventListener('blur', () => {
@@ -361,6 +371,56 @@ elements.bgUpload.addEventListener('change', (e) => {
         reader.readAsDataURL(file);
     }
 });
+
+
+// --- MODULAR WIDGETS ---
+elements.switchBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const target = btn.dataset.widget;
+        elements.switchBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        elements.widgetContents.forEach(content => {
+            content.classList.toggle('hidden', content.id !== `widget-${target}`);
+        });
+
+        if (target === 'tree') renderTree();
+    });
+});
+
+function renderTree() {
+    const today = new Date().toISOString().split('T')[0];
+    const mins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
+    
+    let stage = 0; // Seed
+    if (mins > 10) stage = 1; // Sprout
+    if (mins > 30) stage = 2; // Sapling
+    if (mins > 60) stage = 3; // Small Tree
+    if (mins > 120) stage = 4; // Full Tree
+    if (mins > 240) stage = 5; // Flowering
+
+    const colors = [
+        '#8B4513', // Trunk
+        getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#d8b4e2' // Leaves
+    ];
+
+    const trees = [
+        `<svg viewBox="0 0 100 100"><circle cx="50" cy="80" r="5" fill="${colors[0]}"/></svg>`, // Seed
+        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 60" stroke="${colors[0]}" stroke-width="4"/><circle cx="50" cy="55" r="10" fill="${colors[1]}"/></svg>`, // Sprout
+        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 40" stroke="${colors[0]}" stroke-width="6"/><circle cx="50" cy="35" r="20" fill="${colors[1]}"/></svg>`, // Sapling
+        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 30" stroke="${colors[0]}" stroke-width="8"/><circle cx="40" cy="30" r="15" fill="${colors[1]}"/><circle cx="60" cy="30" r="15" fill="${colors[1]}"/><circle cx="50" cy="20" r="20" fill="${colors[1]}"/></svg>`, // Tree
+        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 20" stroke="${colors[0]}" stroke-width="10"/><circle cx="35" cy="30" r="18" fill="${colors[1]}"/><circle cx="65" cy="30" r="18" fill="${colors[1]}"/><circle cx="50" cy="15" r="22" fill="${colors[1]}"/><circle cx="50" cy="40" r="15" fill="${colors[1]}"/></svg>`, // Full
+        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 20" stroke="${colors[0]}" stroke-width="10"/><circle cx="35" cy="30" r="18" fill="${colors[1]}"/><circle cx="65" cy="30" r="18" fill="${colors[1]}"/><circle cx="50" cy="15" r="22" fill="${colors[1]}"/><circle cx="50" cy="40" r="15" fill="${colors[1]}"/><circle cx="30" cy="25" r="4" fill="white"/><circle cx="70" cy="25" r="4" fill="white"/><circle cx="50" cy="10" r="4" fill="white"/></svg>` // Flowering
+    ];
+
+    elements.treeDisplay.innerHTML = trees[stage];
+}
+
+function updateTapeLabel() {
+    const task = elements.taskSelect.value || "SPACE FOCUS";
+    elements.tapeLabel.innerText = task.toUpperCase();
+}
+elements.taskSelect.addEventListener('change', updateTapeLabel);
 
 
 // --- INITIALIZATION ---

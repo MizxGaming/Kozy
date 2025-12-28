@@ -236,7 +236,6 @@ body {
     transition: stroke-dashoffset 0.35s linear;
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
-    stroke-linecap: round;
 }
 
 .progress-ring__circle-bg {

@@ -51,23 +51,24 @@ body {
     grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    align-items: flex-start; /* Align to the top-left */
+    text-align: left;
 }
 
 .clock {
-    font-size: 7rem; /* Increased size */
+    font-size: 6rem; /* Slightly smaller for corner placement */
     font-weight: 700;
-    text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    text-shadow: 0 4px 12px rgba(0,0,0,0.5);
     line-height: 1;
+    margin-bottom: 5px;
 }
 
 .greeting {
-    margin: 10px 0;
-    font-size: 2.5rem;
-    font-weight: 500;
-    color: var(--accent);
-    text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    margin: 5px 0;
+    font-size: 2.8rem;
+    font-weight: 700; /* Increased weight */
+    color: #ffffff; /* Pure white for maximum visibility */
+    text-shadow: 0 4px 15px rgba(0,0,0,0.6); /* Stronger shadow */
 }
 
 .date-weather-row {

@@ -381,21 +381,31 @@ elements.bgUpload.addEventListener('change', (e) => {
 
 
 // --- MODULAR WIDGETS ---
-elements.switchBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const target = btn.dataset.widget;
-        elements.switchBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        elements.widgetContents.forEach(content => {
-            content.classList.toggle('hidden', content.id !== `widget-${target}`);
-        });
+function initWidgets() {
+    const switchBtns = document.querySelectorAll('.switch-btn');
+    const widgetContents = document.querySelectorAll('.widget-content');
 
-        if (target === 'tree') renderTree();
-        if (target === 'stars') renderStars();
-        if (target === 'pet') updatePet();
+    switchBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.widget;
+            
+            // Update buttons
+            switchBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Update content
+            widgetContents.forEach(content => {
+                const isTarget = content.id === `widget-${target}`;
+                content.classList.toggle('hidden', !isTarget);
+            });
+
+            // Trigger specific renders
+            if (target === 'tree') renderTree();
+            if (target === 'stars') renderStars();
+            if (target === 'pet') updatePet();
+        });
     });
-});
+}
 
 function renderStars() {
     const today = new Date().toISOString().split('T')[0];
@@ -461,6 +471,62 @@ function updateTapeLabel() {
 elements.taskSelect.addEventListener('change', updateTapeLabel);
 
 
+// --- ZEN MIXER (AUDIO) ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const channels = {};
+
+function createNoise(type) {
+    const bufferSize = 2 * audioCtx.sampleRate;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const output = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+    }
+    const whiteNoise = audioCtx.createBufferSource();
+    whiteNoise.buffer = buffer;
+    whiteNoise.loop = true;
+
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0;
+
+    // Filter for different "types" of noise
+    const filter = audioCtx.createBiquadFilter();
+    if (type === 'rain') {
+        filter.type = 'lowpass';
+        filter.frequency.value = 500;
+    } else if (type === 'wind') {
+        filter.type = 'bandpass';
+        filter.frequency.value = 800;
+        filter.Q.value = 1;
+    } else {
+        filter.type = 'lowpass';
+        filter.frequency.value = 300;
+    }
+
+    whiteNoise.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    whiteNoise.start();
+
+    return gainNode;
+}
+
+function initMixer() {
+    const sliders = document.querySelectorAll('.mixer-slider');
+    const types = ['rain', 'wind', 'cafe', 'fire'];
+    
+    sliders.forEach((slider, index) => {
+        const type = types[index];
+        channels[type] = createNoise(type);
+
+        slider.addEventListener('input', (e) => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const vol = e.target.value / 100;
+            channels[type].gain.setTargetAtTime(vol * 0.5, audioCtx.currentTime, 0.1);
+        });
+    });
+}
+
 // --- INITIALIZATION ---
 function init() {
     updateClockAndGreeting();
@@ -470,6 +536,8 @@ function init() {
     updateTimerDisplay();
     setWallpaper(state.settings.bg);
     fetchWeather();
+    initWidgets();
+    initMixer();
 }
 
 init();

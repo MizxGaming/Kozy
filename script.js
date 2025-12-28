@@ -8,6 +8,7 @@ const state = {
         lat: localStorage.getItem('cozyLat') || null,
         lon: localStorage.getItem('cozyLon') || null,
         bg: localStorage.getItem('cozyBg') || 'https://images.wallpapersden.com/image/download/anime-girl-looking-at-sky-scenery_bWlma2uUmZqaraWkpJRmbmdlrWZlbWU.jpg',
+        activeWidget: localStorage.getItem('cozyActiveWidget') || 'tree',
         dynamicColors: true,
     },
     timer: {
@@ -361,6 +362,13 @@ elements.userNameInput.addEventListener('input', (e) => {
     updateClockAndGreeting();
 });
 
+elements.userCityInput.value = state.settings.city;
+elements.userCityInput.addEventListener('input', (e) => {
+    state.settings.city = e.target.value;
+    localStorage.setItem('cozyCity', state.settings.city);
+    // Note: Weather updates might need a button or debounced fetch
+});
+
 elements.presetBtns.forEach(btn => {
     btn.addEventListener('click', () => {
         const bg = btn.dataset.bg;
@@ -392,6 +400,8 @@ function initWidgets() {
         if (!btn) return;
 
         const target = btn.getAttribute('data-widget');
+        state.settings.activeWidget = target;
+        localStorage.setItem('cozyActiveWidget', target);
         
         // Update buttons
         document.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active'));
@@ -409,8 +419,9 @@ function initWidgets() {
         if (target === 'pet') updatePet();
     });
 
-    // Initial render
-    renderTree();
+    // Restore initial widget
+    const initialBtn = document.querySelector(`.switch-btn[data-widget="${state.settings.activeWidget}"]`);
+    if (initialBtn) initialBtn.click();
 }
 
 // Close settings with Escape key
@@ -527,6 +538,7 @@ function createNoise(type) {
 function initMixer() {
     const sliders = document.querySelectorAll('.mixer-slider');
     const types = ['rain', 'wind', 'cafe', 'fire'];
+    const savedVols = JSON.parse(localStorage.getItem('cozyMixer')) || [0, 0, 0, 0];
     
     sliders.forEach((slider, index) => {
         const type = types[index];
@@ -535,10 +547,21 @@ function initMixer() {
             channels[type] = createNoise(type);
         }
 
+        // Restore volume
+        const initialVol = savedVols[index];
+        slider.value = initialVol;
+        if (initialVol > 0) {
+            channels[type].gain.setTargetAtTime((initialVol / 100) * 0.4, audioCtx.currentTime, 0.1);
+        }
+
         slider.oninput = (e) => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const vol = e.target.value / 100;
             channels[type].gain.setTargetAtTime(vol * 0.4, audioCtx.currentTime, 0.1);
+            
+            // Save volumes
+            const currentVols = Array.from(sliders).map(s => s.value);
+            localStorage.setItem('cozyMixer', JSON.stringify(currentVols));
         };
     });
 }

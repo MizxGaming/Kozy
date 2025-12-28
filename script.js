@@ -65,7 +65,7 @@ function formatTime(sec) {
 }
 
 
-// --- CLOCK & GREETING ---
+// --- CLOCK, GREETING & WEATHER ---
 function updateClockAndGreeting() {
     const now = new Date();
     elements.clock.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -77,6 +77,48 @@ function updateClockAndGreeting() {
     if (hour >= 18) greet = "Good Evening";
     elements.greeting.innerText = state.settings.name ? `${greet}, ${state.settings.name}` : greet;
 }
+
+async function fetchWeather() {
+    const { lat, lon } = state.settings;
+    if (!lat || !lon) return;
+
+    try {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+        const data = await res.json();
+        const { temperature, weathercode } = data.current_weather;
+        
+        elements.weather.classList.remove('hidden');
+        elements.weather.querySelector('span').innerText = `${Math.round(temperature)}°C`;
+        
+        // Simple icon mapping
+        let icon = 'fa-cloud-sun';
+        if (weathercode === 0) icon = 'fa-sun';
+        if (weathercode > 0 && weathercode < 4) icon = 'fa-cloud-sun';
+        if (weathercode >= 45 && weathercode <= 48) icon = 'fa-smog';
+        if (weathercode >= 51 && weathercode <= 67) icon = 'fa-cloud-rain';
+        if (weathercode >= 71 && weathercode <= 77) icon = 'fa-snowflake';
+        if (weathercode >= 80 && weathercode <= 82) icon = 'fa-cloud-showers-heavy';
+        if (weathercode >= 95) icon = 'fa-bolt';
+        
+        elements.weather.querySelector('i').className = `fas ${icon}`;
+    } catch (e) {
+        console.error("Weather fetch failed", e);
+    }
+}
+
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+            state.settings.lat = pos.coords.latitude;
+            state.settings.lon = pos.coords.longitude;
+            localStorage.setItem('cozyLat', state.settings.lat);
+            localStorage.setItem('cozyLon', state.settings.lon);
+            fetchWeather();
+        });
+    }
+}
+
+elements.geoBtn.addEventListener('click', getLocation);
 
 
 // --- TODO & TASK SELECTOR ---
@@ -254,6 +296,30 @@ function renderCalendar() {
 
 
 // --- SETTINGS ---
+function setWallpaper(url) {
+    document.body.style.backgroundImage = `url('${url}')`;
+    state.settings.bg = url;
+    localStorage.setItem('cozyBg', url);
+    updateAccentColor(url);
+}
+
+function updateAccentColor(url) {
+    if (!state.settings.dynamicColors) return;
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.src = url;
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 1, canvas.height = 1;
+        ctx.drawImage(img, 0, 0, 1, 1);
+        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+        // Lighten the color for accent
+        const accent = `rgb(${Math.min(r + 80, 255)}, ${Math.min(g + 80, 255)}, ${Math.min(b + 80, 255)})`;
+        document.documentElement.style.setProperty('--accent', accent);
+    };
+}
+
 elements.settingsBtn.addEventListener('click', () => elements.settingsModal.classList.remove('hidden'));
 elements.closeSettingsBtn.addEventListener('click', () => elements.settingsModal.classList.add('hidden'));
 
@@ -264,6 +330,24 @@ elements.userNameInput.addEventListener('input', (e) => {
     updateClockAndGreeting();
 });
 
+elements.presetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const bg = btn.dataset.bg;
+        setWallpaper(bg);
+    });
+});
+
+elements.bgUpload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            setWallpaper(event.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
 
 // --- INITIALIZATION ---
 function init() {
@@ -272,6 +356,8 @@ function init() {
     fetchQuote();
     renderCalendar();
     updateTimerDisplay();
+    setWallpaper(state.settings.bg);
+    fetchWeather();
 }
 
 init();

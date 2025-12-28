@@ -1,6 +1,6 @@
 :root {
-    --glass-bg: rgba(20, 20, 20, 0.5); /* More translucent */
-    --glass-border: rgba(255, 255, 255, 0.08); /* More translucent */
+    --glass-bg: rgba(20, 20, 20, 0.25); /* More translucent for better wallpaper visibility */
+    --glass-border: rgba(255, 255, 255, 0.1); 
     --text-primary: #ffffff;
     --text-secondary: #cccccc;
     --accent: #d8b4e2;

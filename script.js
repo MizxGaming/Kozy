@@ -69,16 +69,6 @@ const elements = {
 
 
 // --- HELPERS ---
-function saveToDB(key, value) {
-    const request = indexedDB.open("CozyFocusDB", 1);
-    request.onsuccess = (e) => {
-        const db = e.target.result;
-        const tx = db.transaction("settings", "readwrite");
-        const store = tx.objectStore("settings");
-        store.put(value, key);
-    };
-}
-
 function formatTime(sec) {
     const m = Math.floor(sec / 60).toString().padStart(2, '0');
     const s = (sec % 60).toString().padStart(2, '0');
@@ -340,24 +330,17 @@ function renderCalendar() {
 // --- SETTINGS ---
 function setWallpaper(url) {
     if (!url) return;
-    
-    // Update CSS Variable
     document.documentElement.style.setProperty('--current-bg', `url('${url}')`);
-    
-    // Update State and Storage
     state.settings.bg = url;
     localStorage.setItem('cozyBg', url);
-    saveToDB("customBg", url);
-    
-    // Update Colors
     updateAccentColor(url);
 }
 
 function updateAccentColor(url) {
-    if (!state.settings.dynamicColors || !url) return;
+    if (!state.settings.dynamicColors) return;
     const img = new Image();
     img.crossOrigin = "Anonymous";
-    
+    img.src = url;
     img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -369,8 +352,6 @@ function updateAccentColor(url) {
         document.documentElement.style.setProperty('--accent', accent);
         localStorage.setItem('cozyAccent', accent);
     };
-
-    img.src = url;
 }
 
 elements.settingsBtn.addEventListener('click', () => elements.settingsModal.classList.remove('hidden'));
@@ -411,37 +392,37 @@ elements.bgUpload.addEventListener('change', (e) => {
 
 // --- MODULAR WIDGETS ---
 function initWidgets() {
+    const switcher = document.querySelector('.widget-switcher');
     const widgetContents = document.querySelectorAll('.widget-content');
 
-    // Global listener to bypass any overlapping element issues
-    window.addEventListener('click', (e) => {
+    if (!switcher) return;
+
+    switcher.addEventListener('click', (e) => {
         const btn = e.target.closest('.switch-btn');
         if (!btn) return;
 
-        e.preventDefault();
         const target = btn.getAttribute('data-widget');
+        state.settings.activeWidget = target;
+        localStorage.setItem('cozyActiveWidget', target);
         
-        // Update active button state
+        // Update buttons
         document.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         
-        // Update active content state using the .active class for Stack & Fade
+        // Update content
         widgetContents.forEach(content => {
             const isTarget = content.id === `widget-${target}`;
-            content.classList.toggle('active', isTarget);
+            content.classList.toggle('hidden', !isTarget);
         });
 
-        // Trigger specific rendering/logic
+        // Trigger specific renders
         if (target === 'tree') renderTree();
         if (target === 'stars') renderStars();
         if (target === 'pet') updatePet();
-        
-        localStorage.setItem('cozyActiveWidget', target);
     });
 
-    // Restore the saved widget from localStorage on load
-    const savedWidget = localStorage.getItem('cozyActiveWidget') || 'tree';
-    const initialBtn = document.querySelector(`.switch-btn[data-widget="${savedWidget}"]`);
+    // Restore initial widget
+    const initialBtn = document.querySelector(`.switch-btn[data-widget="${state.settings.activeWidget}"]`);
     if (initialBtn) initialBtn.click();
 }
 
@@ -455,20 +436,17 @@ window.addEventListener('keydown', (e) => {
 function renderStars() {
     const today = new Date().toISOString().split('T')[0];
     const mins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
-    // Base 5 stars + 1 per 5 mins
-    const starCount = 5 + Math.floor(mins / 5); 
-    
-    if (!elements.starsDisplay) return;
+    const starCount = Math.floor(mins / 5); // 1 star per 5 mins
     
     elements.starsDisplay.innerHTML = '';
     for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
         star.className = 'star';
-        const size = Math.random() * 3 + 2;
+        const size = Math.random() * 3 + 1;
         star.style.width = `${size}px`;
         star.style.height = `${size}px`;
-        star.style.left = `${Math.random() * 95}%`;
-        star.style.top = `${Math.random() * 95}%`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
         star.style.animationDelay = `${Math.random() * 2}s`;
         elements.starsDisplay.appendChild(star);
     }
@@ -495,21 +473,21 @@ function renderTree() {
     if (mins > 120) stage = 4; // Full Tree
     if (mins > 240) stage = 5; // Flowering
 
-    const trunkColor = '#8B4513';
-    const leafColor = localStorage.getItem('cozyAccent') || '#d8b4e2';
-
-    const trees = [
-        `<svg width="100%" height="100%" viewBox="0 0 100 100"><circle cx="50" cy="80" r="5" fill="${trunkColor}"/></svg>`, // Seed
-        `<svg width="100%" height="100%" viewBox="0 0 100 100"><path d="M50 80 L50 60" stroke="${trunkColor}" stroke-width="4"/><circle cx="50" cy="55" r="10" fill="${leafColor}"/></svg>`, // Sprout
-        `<svg width="100%" height="100%" viewBox="0 0 100 100"><path d="M50 80 L50 40" stroke="${trunkColor}" stroke-width="6"/><circle cx="50" cy="35" r="20" fill="${leafColor}"/></svg>`, // Sapling
-        `<svg width="100%" height="100%" viewBox="0 0 100 100"><path d="M50 80 L50 30" stroke="${trunkColor}" stroke-width="8"/><circle cx="40" cy="30" r="15" fill="${leafColor}"/><circle cx="60" cy="30" r="15" fill="${leafColor}"/><circle cx="50" cy="20" r="20" fill="${leafColor}"/></svg>`, // Tree
-        `<svg width="100%" height="100%" viewBox="0 0 100 100"><path d="M50 80 L50 20" stroke="${trunkColor}" stroke-width="10"/><circle cx="35" cy="30" r="18" fill="${leafColor}"/><circle cx="65" cy="30" r="18" fill="${leafColor}"/><circle cx="50" cy="15" r="22" fill="${leafColor}"/><circle cx="50" cy="40" r="15" fill="${leafColor}"/></svg>`, // Full
-        `<svg width="100%" height="100%" viewBox="0 0 100 100"><path d="M50 80 L50 20" stroke="${trunkColor}" stroke-width="10"/><circle cx="35" cy="30" r="18" fill="${leafColor}"/><circle cx="65" cy="30" r="18" fill="${leafColor}"/><circle cx="50" cy="15" r="22" fill="${leafColor}"/><circle cx="50" cy="40" r="15" fill="${leafColor}"/><circle cx="30" cy="25" r="4" fill="white"/><circle cx="70" cy="25" r="4" fill="white"/><circle cx="50" cy="10" r="4" fill="white"/></svg>` // Flowering
+    const colors = [
+        '#8B4513', // Trunk
+        getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#d8b4e2' // Leaves
     ];
 
-    if (elements.treeDisplay) {
-        elements.treeDisplay.innerHTML = trees[stage];
-    }
+    const trees = [
+        `<svg viewBox="0 0 100 100"><circle cx="50" cy="80" r="5" fill="${colors[0]}"/></svg>`, // Seed
+        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 60" stroke="${colors[0]}" stroke-width="4"/><circle cx="50" cy="55" r="10" fill="${colors[1]}"/></svg>`, // Sprout
+        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 40" stroke="${colors[0]}" stroke-width="6"/><circle cx="50" cy="35" r="20" fill="${colors[1]}"/></svg>`, // Sapling
+        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 30" stroke="${colors[0]}" stroke-width="8"/><circle cx="40" cy="30" r="15" fill="${colors[1]}"/><circle cx="60" cy="30" r="15" fill="${colors[1]}"/><circle cx="50" cy="20" r="20" fill="${colors[1]}"/></svg>`, // Tree
+        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 20" stroke="${colors[0]}" stroke-width="10"/><circle cx="35" cy="30" r="18" fill="${colors[1]}"/><circle cx="65" cy="30" r="18" fill="${colors[1]}"/><circle cx="50" cy="15" r="22" fill="${colors[1]}"/><circle cx="50" cy="40" r="15" fill="${colors[1]}"/></svg>`, // Full
+        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 20" stroke="${colors[0]}" stroke-width="10"/><circle cx="35" cy="30" r="18" fill="${colors[1]}"/><circle cx="65" cy="30" r="18" fill="${colors[1]}"/><circle cx="50" cy="15" r="22" fill="${colors[1]}"/><circle cx="50" cy="40" r="15" fill="${colors[1]}"/><circle cx="30" cy="25" r="4" fill="white"/><circle cx="70" cy="25" r="4" fill="white"/><circle cx="50" cy="10" r="4" fill="white"/></svg>` // Flowering
+    ];
+
+    elements.treeDisplay.innerHTML = trees[stage];
 }
 
 function updateTapeLabel() {
@@ -566,8 +544,6 @@ function initMixer() {
     
     sliders.forEach((slider, index) => {
         const type = types[index];
-        if (!type) return;
-
         // Create noise only once
         if (!channels[type]) {
             channels[type] = createNoise(type);
@@ -585,8 +561,8 @@ function initMixer() {
             const vol = e.target.value / 100;
             channels[type].gain.setTargetAtTime(vol * 0.4, audioCtx.currentTime, 0.1);
             
-            // Save current volumes to localStorage
-            const currentVols = Array.from(document.querySelectorAll('.mixer-slider')).map(s => s.value);
+            // Save volumes
+            const currentVols = Array.from(sliders).map(s => s.value);
             localStorage.setItem('cozyMixer', JSON.stringify(currentVols));
         };
     });

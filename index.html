@@ -9,32 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script>
-        // High-priority pre-render script with IndexedDB support
+        // High-priority pre-render script
         (function() {
-            const defaultBg = 'https://images.wallpapersden.com/image/download/anime-girl-looking-at-sky-scenery_bWlma2uUmZqaraWkpJRmbmdlrWZlbWU.jpg';
-            const savedAccent = localStorage.getItem('cozyAccent');
+            const savedBg = localStorage.getItem('cozyBg') || 'https://images.wallpapersden.com/image/download/anime-girl-looking-at-sky-scenery_bWlma2uUmZqaraWkpJRmbmdlrWZlbWU.jpg';
+            document.documentElement.style.setProperty('--current-bg', `url('${savedBg}')`);
             
+            const savedAccent = localStorage.getItem('cozyAccent');
             if (savedAccent) {
                 document.documentElement.style.setProperty('--accent', savedAccent);
             }
-
-            // Check IndexedDB for large custom images
-            const request = indexedDB.open("CozyFocusDB", 1);
-            request.onupgradeneeded = (e) => e.target.result.createObjectStore("settings");
-            request.onsuccess = (e) => {
-                const db = e.target.result;
-                const tx = db.transaction("settings", "readonly");
-                const store = tx.objectStore("settings");
-                const getBg = store.get("customBg");
-                getBg.onsuccess = () => {
-                    const bg = getBg.result || localStorage.getItem('cozyBg') || defaultBg;
-                    document.documentElement.style.setProperty('--current-bg', `url('${bg}')`);
-                };
-            };
-            request.onerror = () => {
-                const bg = localStorage.getItem('cozyBg') || defaultBg;
-                document.documentElement.style.setProperty('--current-bg', `url('${bg}')`);
-            };
         })();
     </script>
 </head>
@@ -86,12 +69,11 @@
                     <div id="widget-tree" class="widget-content">
                         <div class="tree-container">
                             <div class="tree-stage" id="tree-display"></div>
-                            <p class="toy-label">Focus Tree</p>
                         </div>
                     </div>
 
                     <!-- Tape Widget -->
-                    <div id="widget-tape" class="widget-content">
+                    <div id="widget-tape" class="widget-content hidden">
                         <div class="tape-container">
                             <div class="cassette">
                                 <div class="reel left-reel"></div>
@@ -99,39 +81,34 @@
                                 <div class="label" id="tape-label">SPACE FOCUS</div>
                             </div>
                         </div>
-                        <p class="toy-label">Lofi Tape</p>
                     </div>
 
                     <!-- Mixer Widget -->
-                    <div id="widget-mixer" class="widget-content">
+                    <div id="widget-mixer" class="widget-content hidden">
                         <div class="mixer-container">
                             <div class="mixer-row"><i class="fas fa-cloud-rain"></i><input type="range" class="mixer-slider" min="0" max="100" value="0"></div>
                             <div class="mixer-row"><i class="fas fa-wind"></i><input type="range" class="mixer-slider" min="0" max="100" value="0"></div>
                             <div class="mixer-row"><i class="fas fa-mug-hot"></i><input type="range" class="mixer-slider" min="0" max="100" value="0"></div>
                             <div class="mixer-row"><i class="fas fa-fire"></i><input type="range" class="mixer-slider" min="0" max="100" value="0"></div>
                         </div>
-                        <p class="toy-label">Zen Mixer</p>
                     </div>
 
                     <!-- Stars Widget -->
-                    <div id="widget-stars" class="widget-content">
+                    <div id="widget-stars" class="widget-content hidden">
                         <div class="stars-container" id="stars-display"></div>
-                        <p class="toy-label">Focus Stars</p>
                     </div>
 
                     <!-- Pet Widget -->
-                    <div id="widget-pet" class="widget-content">
+                    <div id="widget-pet" class="widget-content hidden">
                         <div class="pet-container">
                             <div class="pet-character" id="pet-display"><i class="fas fa-robot"></i></div>
                             <p id="pet-status">Pet is resting...</p>
                         </div>
-                        <p class="toy-label">Focus Pet</p>
                     </div>
 
                     <!-- Pulse Widget -->
-                    <div id="widget-pulse" class="widget-content">
+                    <div id="widget-pulse" class="widget-content hidden">
                         <div class="pulse-container"><div class="pulse-blob"></div></div>
-                        <p class="toy-label">Focus Pulse</p>
                     </div>
                 </div>
             </div>

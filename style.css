@@ -175,8 +175,6 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    position: relative;
-    z-index: 100; /* Extremely high */
 }
 
 .panel-header {
@@ -186,8 +184,6 @@ body {
     margin-bottom: 15px;
     border-bottom: 1px solid var(--glass-border);
     padding-bottom: 8px;
-    position: relative;
-    z-index: 110; 
 }
 
 /* Settings Close Button */
@@ -217,8 +213,7 @@ body {
     flex-wrap: wrap; 
     justify-content: flex-end;
     position: relative;
-    z-index: 120;
-    pointer-events: auto !important;
+    z-index: 20; /* Ensure buttons are above everything */
 }
 
 .switch-btn {
@@ -234,7 +229,7 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: auto !important;
+    pointer-events: auto; /* Force pointer events */
 }
 
 .switch-btn:hover {
@@ -252,31 +247,21 @@ body {
 
 .widget-display {
     flex: 1;
-    display: grid; /* Stack children in a grid */
-    place-items: center;
+    position: relative;
     width: 100%;
     min-height: 0;
-    overflow: hidden;
 }
 
 .widget-content {
-    grid-area: 1 / 1; /* All widgets occupy the same grid cell */
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    transform: scale(0.95);
-}
-
-.widget-content.active {
-    opacity: 1;
-    pointer-events: auto;
-    transform: scale(1);
 }
 
 .widget-content.hidden {
@@ -338,14 +323,6 @@ body {
     animation: breathe 4s infinite ease-in-out;
 }
 
-.toy-label {
-    font-size: 0.7rem;
-    color: var(--accent);
-    margin-top: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    opacity: 0.6;
-}
 @keyframes twinkle { from { opacity: 0.3; } to { opacity: 1; } }
 @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
 @keyframes breathe {

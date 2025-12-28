@@ -350,6 +350,7 @@ function updateAccentColor(url) {
         // Lighten the color for accent
         const accent = `rgb(${Math.min(r + 80, 255)}, ${Math.min(g + 80, 255)}, ${Math.min(b + 80, 255)})`;
         document.documentElement.style.setProperty('--accent', accent);
+        localStorage.setItem('cozyAccent', accent);
     };
 }
 

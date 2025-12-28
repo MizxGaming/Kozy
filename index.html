@@ -13,6 +13,11 @@
         (function() {
             const savedBg = localStorage.getItem('cozyBg') || 'https://images.wallpapersden.com/image/download/anime-girl-looking-at-sky-scenery_bWlma2uUmZqaraWkpJRmbmdlrWZlbWU.jpg';
             document.documentElement.style.setProperty('--current-bg', `url('${savedBg}')`);
+            
+            const savedAccent = localStorage.getItem('cozyAccent');
+            if (savedAccent) {
+                document.documentElement.style.setProperty('--accent', savedAccent);
+            }
         })();
     </script>
 </head>

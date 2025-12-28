@@ -188,29 +188,32 @@ body {
 
 /* Settings Close Button */
 #close-settings {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-secondary);
-    width: 36px;
-    height: 36px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
-    border: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
 }
 
 #close-settings:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
+    background: #ff5f57; /* Mac-style close color */
+    border-color: #ff5f57;
     transform: rotate(90deg);
 }
 
 .widget-switcher {
     display: flex;
     gap: 6px;
-    flex-wrap: wrap; /* Allow wrapping if space is tight */
+    flex-wrap: wrap; 
     justify-content: flex-end;
+    position: relative;
+    z-index: 20; /* Ensure buttons are above everything */
 }
 
 .switch-btn {
@@ -226,8 +229,7 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+    pointer-events: auto; /* Force pointer events */
 }
 
 .switch-btn:hover {

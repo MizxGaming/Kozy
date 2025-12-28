@@ -382,30 +382,31 @@ elements.bgUpload.addEventListener('change', (e) => {
 
 // --- MODULAR WIDGETS ---
 function initWidgets() {
-    const switchBtns = document.querySelectorAll('.switch-btn');
+    const switcher = document.querySelector('.widget-switcher');
     const widgetContents = document.querySelectorAll('.widget-content');
 
-    if (switchBtns.length === 0) return;
+    if (!switcher) return;
 
-    switchBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const target = btn.getAttribute('data-widget');
-            
-            // Update buttons
-            switchBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            // Update content
-            widgetContents.forEach(content => {
-                const isTarget = content.id === `widget-${target}`;
-                content.classList.toggle('hidden', !isTarget);
-            });
+    switcher.addEventListener('click', (e) => {
+        const btn = e.target.closest('.switch-btn');
+        if (!btn) return;
 
-            // Trigger specific renders
-            if (target === 'tree') renderTree();
-            if (target === 'stars') renderStars();
-            if (target === 'pet') updatePet();
+        const target = btn.getAttribute('data-widget');
+        
+        // Update buttons
+        document.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Update content
+        widgetContents.forEach(content => {
+            const isTarget = content.id === `widget-${target}`;
+            content.classList.toggle('hidden', !isTarget);
         });
+
+        // Trigger specific renders
+        if (target === 'tree') renderTree();
+        if (target === 'stars') renderStars();
+        if (target === 'pet') updatePet();
     });
 
     // Initial render
@@ -552,7 +553,13 @@ function init() {
     setWallpaper(state.settings.bg);
     fetchWeather();
     initWidgets();
-    initMixer();
+    
+    try {
+        initMixer();
+    } catch (e) {
+        console.warn("Mixer could not be initialized:", e);
+    }
+
     renderStars();
     updatePet();
 }

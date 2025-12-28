@@ -329,13 +329,11 @@ function renderCalendar() {
 
 // --- SETTINGS ---
 function setWallpaper(url) {
-    const defaultBg = 'https://images.wallpapersden.com/image/download/anime-girl-looking-at-sky-scenery_bWlma2uUmZqaraWkpJRmbmdlrWZlbWU.jpg';
-    const finalUrl = (url && url !== "null" && url !== "undefined") ? url : defaultBg;
-    
-    document.body.style.backgroundImage = `url('${finalUrl}')`;
-    state.settings.bg = finalUrl;
-    localStorage.setItem('cozyBg', finalUrl);
-    updateAccentColor(finalUrl);
+    if (!url) return;
+    document.documentElement.style.setProperty('--current-bg', `url('${url}')`);
+    state.settings.bg = url;
+    localStorage.setItem('cozyBg', url);
+    updateAccentColor(url);
 }
 
 function updateAccentColor(url) {

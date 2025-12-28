@@ -17,7 +17,7 @@ body {
     color: var(--text-primary);
     height: 100vh;
     overflow: hidden;
-    background-color: #111; /* Fallback color */
+    background-image: var(--current-bg);
     background-size: cover;
     background-position: center;
     transition: background-image 0.5s ease-in-out;

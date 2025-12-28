@@ -383,7 +383,38 @@ elements.bgUpload.addEventListener('change', (e) => {
     if (file) {
         const reader = new FileReader();
         reader.onload = (event) => {
-            setWallpaper(event.target.result);
+            const img = new Image();
+            img.onload = () => {
+                // Resize image to ensure it fits in localStorage
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const max = 1920;
+                
+                if (width > max || height > max) {
+                    if (width > height) {
+                        height *= max / width;
+                        width = max;
+                    } else {
+                        width *= max / height;
+                        height = max;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Use JPEG with 0.7 quality for good balance of size/looks
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                try {
+                    setWallpaper(dataUrl);
+                } catch (err) {
+                    alert("Image too large to save even after compression.");
+                }
+            };
+            img.src = event.target.result;
         };
         reader.readAsDataURL(file);
     }

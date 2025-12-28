@@ -388,8 +388,7 @@ function initWidgets() {
     if (switchBtns.length === 0) return;
 
     switchBtns.forEach(btn => {
-        btn.onclick = (e) => {
-            e.preventDefault();
+        btn.addEventListener('click', (e) => {
             const target = btn.getAttribute('data-widget');
             
             // Update buttons
@@ -406,12 +405,19 @@ function initWidgets() {
             if (target === 'tree') renderTree();
             if (target === 'stars') renderStars();
             if (target === 'pet') updatePet();
-        };
+        });
     });
 
-    // Ensure initial tree render if it's the default
+    // Initial render
     renderTree();
 }
+
+// Close settings with Escape key
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        elements.settingsModal.classList.add('hidden');
+    }
+});
 
 function renderStars() {
     const today = new Date().toISOString().split('T')[0];
@@ -547,6 +553,8 @@ function init() {
     fetchWeather();
     initWidgets();
     initMixer();
+    renderStars();
+    updatePet();
 }
 
 init();

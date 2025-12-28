@@ -186,30 +186,61 @@ body {
     padding-bottom: 8px;
 }
 
+/* Settings Close Button */
+#close-settings {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: 1px solid var(--glass-border);
+}
+
+#close-settings:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    transform: rotate(90deg);
+}
+
 .widget-switcher {
     display: flex;
-    gap: 4px;
+    gap: 6px;
+    flex-wrap: wrap; /* Allow wrapping if space is tight */
+    justify-content: flex-end;
 }
 
 .switch-btn {
     background: rgba(255,255,255,0.05);
     color: var(--text-secondary);
     border: 1px solid var(--glass-border);
-    width: 28px;
-    height: 28px;
-    border-radius: 4px;
-    font-size: 0.7rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 0.85rem;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 10;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.switch-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    transform: translateY(-2px);
 }
 
 .switch-btn.active {
     background: var(--accent);
-    color: #222;
+    color: #111;
     border-color: var(--accent);
+    box-shadow: 0 0 15px var(--accent);
 }
 
 .widget-display {

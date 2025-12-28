@@ -28,6 +28,7 @@ const elements = {
     // Timer
     time: document.getElementById('time'),
     ring: document.querySelector('.progress-ring__circle'),
+    thumb: document.querySelector('.progress-ring__thumb'),
     startBtn: document.getElementById('start-btn'),
     resetBtn: document.getElementById('reset-btn'),
     soundBtn: document.getElementById('toggle-sound'),
@@ -169,7 +170,20 @@ elements.ring.style.strokeDasharray = `${circumference} ${circumference}`;
 function updateTimerDisplay() {
     elements.time.innerText = formatTime(state.timer.timeLeft);
     const percent = ((state.timer.totalSeconds - state.timer.timeLeft) / state.timer.totalSeconds) * 100;
-    elements.ring.style.strokeDashoffset = (percent / 100) * circumference;
+    
+    // Darkening progress: starts at 0 (full offset) and goes to 100 (0 offset)
+    const offset = circumference - (percent / 100) * circumference;
+    elements.ring.style.strokeDashoffset = offset;
+
+    // Thumb position: starts at top (-90 degrees)
+    const angle = (percent / 100) * 360 - 90;
+    const radius = 140;
+    const cx = 150, cy = 150;
+    const x = cx + radius * Math.cos(angle * Math.PI / 180);
+    const y = cy + radius * Math.sin(angle * Math.PI / 180);
+    
+    elements.thumb.setAttribute('cx', x);
+    elements.thumb.setAttribute('cy', y);
 }
 
 function finishTimer() {

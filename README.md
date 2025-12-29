@@ -37,10 +37,8 @@ A dedicated panel of interactive widgets to keep you company:
 - **Persistence**: LocalStorage for 100% client-side data privacy.
 - **Design**: Glassmorphism UI with Space Mono & Quicksand typography.
 
-## 🤖 Credits & Origin
-This project was born out of a desire to pass the time through **Vibe Coding**. 
-
-It was developed collaboratively with **Gemini (Google's AI)**, who handled the architectural mapping, logic implementation, and bug squashing while maintaining the "cozy" aesthetic vision. 
+## 🌈 Origin
+This project was born out of a desire to pass the time through **Vibe Coding**. It focuses on creating a seamless, aesthetically pleasing environment where productivity feels natural and cozy.
 
 ## 🚀 Getting Started
 1. Clone the repo.
@@ -48,4 +46,4 @@ It was developed collaboratively with **Gemini (Google's AI)**, who handled the 
 3. Set your name, pick a vibe, and start focusing.
 
 ---
-*Made with ☕ and 🪄 by an AI agent and its human collaborator.*
+*Made with ☕ and 🪄 during a late-night vibe coding session.*

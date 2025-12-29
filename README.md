@@ -16,7 +16,6 @@ Kozy is a thoughtfully designed dashboard 🌙 created to transform productivity
 
 ### Interactive Widgets
 The dashboard includes a collection of minimalist toys to accompany your focus sessions 🧸:
-- **Focus Tree**: A visual growth system where progress accumulates from a seed to a flowering tree 🌳.
 - **Zen Mixer**: A custom soundscape generator with rain, wind, cafe, and fire ambient noises 🎛️.
 - **Focus Stars**: A constellation generator that adds a new star for every five minutes of work ✨.
 - **Focus Pet**: A small companion that remains active during focus sessions and rests when you are finished 🤖.

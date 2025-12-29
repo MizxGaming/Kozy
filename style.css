@@ -331,6 +331,31 @@ body {
     overflow: hidden;
 }
 
+.widget-action-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s;
+    font-size: 0.8rem;
+}
+
+.widget-action-btn:hover {
+    background: var(--accent);
+    color: #111;
+    transform: scale(1.1);
+}
+
 .constellation-svg {
     position: absolute;
     top: 0;
@@ -371,6 +396,15 @@ body {
     opacity: 0.8;
 }
 
+.constellation-progress {
+    font-size: 0.55rem;
+    opacity: 0.7;
+    letter-spacing: 1px;
+    text-transform: none;
+    display: block;
+    margin-top: 4px;
+}
+
 .star {
     position: absolute;
     background: white;
@@ -378,6 +412,12 @@ body {
     box-shadow: 0 0 5px white;
     z-index: 2;
     transition: all 1s;
+    animation: twinkle 3s infinite alternate;
+}
+
+@keyframes twinkle {
+    from { opacity: 0.3; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1.1); }
 }
 
 /* Pet Widget */

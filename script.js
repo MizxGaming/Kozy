@@ -5,7 +5,7 @@ const state = {
     settings: {
         name: localStorage.getItem('cozyName') || '',
         bg: localStorage.getItem('cozyBg') || 'https://images.wallpapersden.com/image/download/anime-girl-looking-at-sky-scenery_bWlma2uUmZqaraWkpJRmbmdlrWZlbWU.jpg',
-        activeWidget: localStorage.getItem('cozyActiveWidget') || 'tree',
+        activeWidget: localStorage.getItem('cozyActiveWidget') || 'mixer',
         dynamicColors: true,
     },
     timer: {
@@ -18,6 +18,9 @@ const state = {
     analysis: {
         currentDate: getLocalDate(),
         view: 'calendar' // or 'analysis'
+    },
+    stars: {
+        shuffleOffset: parseInt(localStorage.getItem('cozyStarsOffset')) || 0
     }
 };
 
@@ -65,8 +68,8 @@ const elements = {
     // Modular Widgets
     switchBtns: document.querySelectorAll('.switch-btn'),
     widgetContents: document.querySelectorAll('.widget-content'),
-    treeDisplay: document.getElementById('tree-display'),
     starsDisplay: document.getElementById('stars-display'),
+    shuffleStarsBtn: document.getElementById('shuffle-stars'),
     petDisplay: document.getElementById('pet-display'),
     petStatus: document.getElementById('pet-status'),
     toyInfoBtn: document.getElementById('toy-info-btn'),
@@ -260,7 +263,6 @@ function saveSession(minutes, task) {
     renderCalendar();
     renderAnalysis();
     renderStars();
-    renderTree();
 }
 
 function toggleHistoryView() {
@@ -449,7 +451,6 @@ elements.bgUpload.addEventListener('change', (e) => {
 
 // --- MODULAR WIDGETS ---
 const toyDescriptions = {
-    tree: { title: "Focus Tree", desc: "Watch your progress grow from a tiny seed into a flowering tree as you focus." },
     mixer: { title: "Zen Mixer", desc: "Craft your perfect ambient atmosphere by blending rain, wind, cafe, and fire sounds." },
     stars: { title: "Focus Stars", desc: "Build your own constellation; a new star is born for every 5 minutes of focused work." },
     pet: { title: "Focus Pet", desc: "A tiny robot companion that stays active while you work and rests when you're done." },
@@ -489,7 +490,6 @@ function initWidgets() {
         });
 
         // Trigger specific renders
-        if (target === 'tree') renderTree();
         if (target === 'stars') renderStars();
         if (target === 'pet') updatePet();
 
@@ -575,24 +575,32 @@ function renderStars() {
     
     elements.starsDisplay.innerHTML = '';
     
+    // Always calculate which constellation we are looking at
+    const constIdx = (Math.floor((starCount - 1) / 10) + state.stars.shuffleOffset) % constellations.length;
+    const currentConst = constellations[constIdx >= 0 ? constIdx : 0];
+    const starsInThisCycle = starCount === 0 ? 0 : (starCount - 1) % 10 + 1;
+    const isCompleted = starsInThisCycle >= currentConst.stars.length;
+
     // SVG layer for lines
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("class", "constellation-svg");
     elements.starsDisplay.appendChild(svg);
 
     const nameTag = document.createElement('div');
-    nameTag.className = 'constellation-name';
+    nameTag.className = 'constellation-name visible';
+    
+    const displayCount = Math.min(starsInThisCycle, currentConst.stars.length);
+    const totalCount = currentConst.stars.length;
+    
+    nameTag.innerHTML = `${currentConst.name}<br><span class="constellation-progress">${displayCount} / ${totalCount} stars</span>`;
+    nameTag.style.opacity = isCompleted ? "0.8" : "0.5"; 
     elements.starsDisplay.appendChild(nameTag);
 
-    // Determine which constellation to show
-    const constellationIdx = Math.floor(starCount / 8) % constellations.length;
-    const currentConst = constellations[constellationIdx];
-    const progressInConst = starCount % 8; // Number of stars in current constellation
-    const isCompleted = progressInConst >= currentConst.stars.length;
+    if (starCount === 0) return;
 
-    // Render stars of current constellation
+    // Render stars of the current pattern
     currentConst.stars.forEach((pos, i) => {
-        if (i < progressInConst || isCompleted) {
+        if (i < starsInThisCycle || isCompleted) {
             const star = document.createElement('div');
             star.className = 'star';
             star.style.width = '3px';
@@ -600,11 +608,12 @@ function renderStars() {
             star.style.left = `${pos[0]}%`;
             star.style.top = `${pos[1]}%`;
             star.style.boxShadow = '0 0 8px #fff';
+            star.style.animationDelay = `${i * 0.5}s`;
             elements.starsDisplay.appendChild(star);
         }
     });
 
-    // Draw lines if completed
+    // Draw lines and show name if completed
     if (isCompleted) {
         currentConst.lines.forEach(line => {
             const p1 = currentConst.stars[line[0]];
@@ -622,20 +631,20 @@ function renderStars() {
         nameTag.classList.add('visible');
     }
 
-    // Fill remaining with random background stars if we have extra focus
-    if (starCount > currentConst.stars.length) {
-        const extra = isCompleted ? progressInConst - currentConst.stars.length : 0;
-        for (let i = 0; i < extra; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            const size = Math.random() * 2 + 1;
-            star.style.width = `${size}px`;
-            star.style.height = `${size}px`;
-            star.style.left = `${Math.random() * 100}%`;
-            star.style.top = `${Math.random() * 100}%`;
-            star.style.opacity = '0.4';
-            elements.starsDisplay.appendChild(star);
-        }
+    // Fill the rest of the space with "background dust" proportional to focus time
+    // This ensures that even as patterns change, the sky stays populated
+    const totalBackgroundStars = starCount; 
+    for (let i = 0; i < totalBackgroundStars; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 2 + 0.5;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.opacity = '0.3';
+        star.style.animationDelay = `${Math.random() * 3}s`;
+        elements.starsDisplay.appendChild(star);
     }
 }
 
@@ -647,34 +656,6 @@ function updatePet() {
         elements.petDisplay.classList.remove('active');
         elements.petStatus.innerText = "Pet is resting...";
     }
-}
-
-function renderTree() {
-    const today = getLocalDate();
-    const mins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
-    
-    let stage = 0; // Seed
-    if (mins > 10) stage = 1; // Sprout
-    if (mins > 30) stage = 2; // Sapling
-    if (mins > 60) stage = 3; // Small Tree
-    if (mins > 120) stage = 4; // Full Tree
-    if (mins > 240) stage = 5; // Flowering
-
-    const colors = [
-        '#8B4513', // Trunk
-        getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#d8b4e2' // Leaves
-    ];
-
-    const trees = [
-        `<svg viewBox="0 0 100 100"><circle cx="50" cy="80" r="5" fill="${colors[0]}"/></svg>`, // Seed
-        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 60" stroke="${colors[0]}" stroke-width="4"/><circle cx="50" cy="55" r="10" fill="${colors[1]}"/></svg>`, // Sprout
-        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 40" stroke="${colors[0]}" stroke-width="6"/><circle cx="50" cy="35" r="20" fill="${colors[1]}"/></svg>`, // Sapling
-        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 30" stroke="${colors[0]}" stroke-width="8"/><circle cx="40" cy="30" r="15" fill="${colors[1]}"/><circle cx="60" cy="30" r="15" fill="${colors[1]}"/><circle cx="50" cy="20" r="20" fill="${colors[1]}"/></svg>`, // Tree
-        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 20" stroke="${colors[0]}" stroke-width="10"/><circle cx="35" cy="30" r="18" fill="${colors[1]}"/><circle cx="65" cy="30" r="18" fill="${colors[1]}"/><circle cx="50" cy="15" r="22" fill="${colors[1]}"/><circle cx="50" cy="40" r="15" fill="${colors[1]}"/></svg>`, // Full
-        `<svg viewBox="0 0 100 100"><path d="M50 80 L50 20" stroke="${colors[0]}" stroke-width="10"/><circle cx="35" cy="30" r="18" fill="${colors[1]}"/><circle cx="65" cy="30" r="18" fill="${colors[1]}"/><circle cx="50" cy="15" r="22" fill="${colors[1]}"/><circle cx="50" cy="40" r="15" fill="${colors[1]}"/><circle cx="30" cy="25" r="4" fill="white"/><circle cx="70" cy="25" r="4" fill="white"/><circle cx="50" cy="10" r="4" fill="white"/></svg>` // Flowering
-    ];
-
-    elements.treeDisplay.innerHTML = trees[stage];
 }
 
 
@@ -771,7 +752,14 @@ elements.soundBtn.addEventListener('click', () => {
 
 // --- INITIALIZATION ---
 function init() {
+    // Precise clock sync: update now, then sync to the start of the next second
     updateClockAndGreeting();
+    const msUntilNextSecond = 1000 - new Date().getMilliseconds();
+    setTimeout(() => {
+        updateClockAndGreeting();
+        setInterval(updateClockAndGreeting, 1000);
+    }, msUntilNextSecond);
+
     renderTodos();
     fetchQuote();
     renderCalendar();
@@ -808,6 +796,12 @@ function init() {
         d.setDate(d.getDate() + 1);
         state.analysis.currentDate = getLocalDate(d);
         renderAnalysis();
+    });
+
+    elements.shuffleStarsBtn.addEventListener('click', () => {
+        state.stars.shuffleOffset = (state.stars.shuffleOffset + 1) % constellations.length;
+        localStorage.setItem('cozyStarsOffset', state.stars.shuffleOffset);
+        renderStars();
     });
 }
 

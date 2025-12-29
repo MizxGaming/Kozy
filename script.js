@@ -520,22 +520,92 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
+const constellations = [
+    {
+        name: "Ursa Minor",
+        stars: [[80, 20], [70, 35], [60, 40], [50, 45], [45, 60], [30, 70], [25, 55]],
+        lines: [[0,1], [1,2], [2,3], [3,4], [4,5], [5,6], [6,4]]
+    },
+    {
+        name: "Cygnus",
+        stars: [[50, 15], [50, 40], [50, 70], [50, 90], [20, 40], [80, 40]],
+        lines: [[0,1], [1,2], [2,3], [4,1], [1,5]]
+    },
+    {
+        name: "Lyra",
+        stars: [[30, 20], [50, 25], [60, 45], [50, 65], [35, 60]],
+        lines: [[0,1], [1,2], [2,3], [3,4], [4,1]]
+    }
+];
+
 function renderStars() {
     const today = getLocalDate();
     const mins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
-    const starCount = Math.floor(mins / 5); // 1 star per 5 mins
+    const starCount = Math.floor(mins / 5); 
     
     elements.starsDisplay.innerHTML = '';
-    for (let i = 0; i < starCount; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        const size = Math.random() * 3 + 1;
-        star.style.width = `${size}px`;
-        star.style.height = `${size}px`;
-        star.style.left = `${Math.random() * 100}%`;
-        star.style.top = `${Math.random() * 100}%`;
-        star.style.animationDelay = `${Math.random() * 2}s`;
-        elements.starsDisplay.appendChild(star);
+    
+    // SVG layer for lines
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "constellation-svg");
+    elements.starsDisplay.appendChild(svg);
+
+    const nameTag = document.createElement('div');
+    nameTag.className = 'constellation-name';
+    elements.starsDisplay.appendChild(nameTag);
+
+    // Determine which constellation to show
+    const constellationIdx = Math.floor(starCount / 8) % constellations.length;
+    const currentConst = constellations[constellationIdx];
+    const progressInConst = starCount % 8; // Number of stars in current constellation
+    const isCompleted = progressInConst >= currentConst.stars.length;
+
+    // Render stars of current constellation
+    currentConst.stars.forEach((pos, i) => {
+        if (i < progressInConst || isCompleted) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = '3px';
+            star.style.height = '3px';
+            star.style.left = `${pos[0]}%`;
+            star.style.top = `${pos[1]}%`;
+            star.style.boxShadow = '0 0 8px #fff';
+            elements.starsDisplay.appendChild(star);
+        }
+    });
+
+    // Draw lines if completed
+    if (isCompleted) {
+        currentConst.lines.forEach(line => {
+            const p1 = currentConst.stars[line[0]];
+            const p2 = currentConst.stars[line[1]];
+            const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            l.setAttribute("x1", `${p1[0]}%`);
+            l.setAttribute("y1", `${p1[1]}%`);
+            l.setAttribute("x2", `${p2[0]}%`);
+            l.setAttribute("y2", `${p2[1]}%`);
+            l.setAttribute("class", "constellation-line");
+            svg.appendChild(l);
+        });
+        
+        nameTag.innerText = currentConst.name;
+        nameTag.classList.add('visible');
+    }
+
+    // Fill remaining with random background stars if we have extra focus
+    if (starCount > currentConst.stars.length) {
+        const extra = isCompleted ? progressInConst - currentConst.stars.length : 0;
+        for (let i = 0; i < extra; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 2 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.opacity = '0.4';
+            elements.starsDisplay.appendChild(star);
+        }
     }
 }
 

@@ -69,6 +69,13 @@ function formatTime(sec) {
     return `${m}:${s}`;
 }
 
+function getLocalDate(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 
 // --- CLOCK, GREETING & WEATHER ---
 function updateClockAndGreeting() {
@@ -236,46 +243,55 @@ elements.newQuoteBtn.addEventListener('click', fetchQuote);
 
 // --- CALENDAR & HISTORY ---
 function saveSession(minutes, task) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDate();
     state.sessions.push({ date: today, minutes, task });
     localStorage.setItem('cozySessions', JSON.stringify(state.sessions));
     renderCalendar();
+    renderStars();
+    renderTree();
 }
 
 function renderCalendar() {
     const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = getLocalDate(today);
     const todaysMinutes = state.sessions.filter(s => s.date === todayStr).reduce((acc, curr) => acc + curr.minutes, 0);
-    elements.todayFocus.innerText = `${todaysMinutes}m focused today`;
-
-    elements.calendarGrid.innerHTML = '';
-    for (let i = 27; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(today.getDate() - i);
-        const dStr = d.toISOString().split('T')[0];
-        
-        const dayMinutes = state.sessions.filter(s => s.date === dStr).reduce((acc, curr) => acc + curr.minutes, 0);
-
-        const cell = document.createElement('div');
-        cell.className = 'calendar-day';
-        if (dStr === todayStr) cell.classList.add('today');
-        if (dayMinutes > 0) {
-            cell.classList.add('focused');
-            if (dayMinutes > 60) cell.classList.add('focused-heavy');
-        }
-        
-        cell.innerText = d.getDate();
-        cell.title = `${dStr}: ${dayMinutes} mins`;
-        elements.calendarGrid.appendChild(cell);
+    
+    if (elements.todayFocus) {
+        elements.todayFocus.innerText = `${todaysMinutes}m focused today`;
     }
 
-    elements.sessionHistory.innerHTML = '';
-    state.sessions.slice(-5).reverse().forEach(s => {
-        const li = document.createElement('li');
-        li.className = 'session-item';
-        li.innerHTML = `<span>${s.task}</span> <span>${s.minutes}m</span>`;
-        elements.sessionHistory.appendChild(li);
-    });
+    if (elements.calendarGrid) {
+        elements.calendarGrid.innerHTML = '';
+        for (let i = 27; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(today.getDate() - i);
+            const dStr = getLocalDate(d);
+            
+            const dayMinutes = state.sessions.filter(s => s.date === dStr).reduce((acc, curr) => acc + curr.minutes, 0);
+
+            const cell = document.createElement('div');
+            cell.className = 'calendar-day';
+            if (dStr === todayStr) cell.classList.add('today');
+            if (dayMinutes > 0) {
+                cell.classList.add('focused');
+                if (dayMinutes > 60) cell.classList.add('focused-heavy');
+            }
+            
+            cell.innerText = d.getDate();
+            cell.title = `${dStr}: ${dayMinutes} mins`;
+            elements.calendarGrid.appendChild(cell);
+        }
+    }
+
+    if (elements.sessionHistory) {
+        elements.sessionHistory.innerHTML = '';
+        state.sessions.slice(-5).reverse().forEach(s => {
+            const li = document.createElement('li');
+            li.className = 'session-item';
+            li.innerHTML = `<span>${s.task}</span> <span>${s.minutes}m</span>`;
+            elements.sessionHistory.appendChild(li);
+        });
+    }
 }
 
 
@@ -410,7 +426,7 @@ window.addEventListener('keydown', (e) => {
 });
 
 function renderStars() {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDate();
     const mins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
     const starCount = Math.floor(mins / 5); // 1 star per 5 mins
     
@@ -439,7 +455,7 @@ function updatePet() {
 }
 
 function renderTree() {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDate();
     const mins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
     
     let stage = 0; // Seed
@@ -476,6 +492,8 @@ elements.taskSelect.addEventListener('change', updateTapeLabel);
 // --- ZEN MIXER (AUDIO) ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const channels = {};
+let brownNoiseChannel = null;
+let brownNoisePlaying = false;
 
 function createNoise(type) {
     const bufferSize = 2 * audioCtx.sampleRate;
@@ -543,6 +561,24 @@ function initMixer() {
         };
     });
 }
+
+elements.soundBtn.addEventListener('click', () => {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    if (!brownNoiseChannel) {
+        brownNoiseChannel = createNoise('brown');
+    }
+    
+    if (brownNoisePlaying) {
+        brownNoiseChannel.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
+        elements.soundBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+        brownNoisePlaying = false;
+    } else {
+        brownNoiseChannel.gain.setTargetAtTime(0.3, audioCtx.currentTime, 0.1);
+        elements.soundBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+        brownNoisePlaying = true;
+    }
+});
 
 // --- INITIALIZATION ---
 function init() {

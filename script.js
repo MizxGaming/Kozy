@@ -14,6 +14,10 @@ const state = {
         id: null,
         running: false,
         initialMinutes: 25,
+    },
+    analysis: {
+        currentDate: getLocalDate(),
+        view: 'calendar' // or 'analysis'
     }
 };
 
@@ -35,10 +39,18 @@ const elements = {
     todoInput: document.getElementById('todo-input'),
     addTodoBtn: document.getElementById('add-todo'),
     todoList: document.getElementById('todo-list'),
-    // Calendar
+    // Calendar & Analysis
     calendarGrid: document.getElementById('mini-calendar'),
     todayFocus: document.getElementById('today-focus'),
-    sessionHistory: document.getElementById('session-history'),
+    calendarView: document.getElementById('calendar-view'),
+    analysisView: document.getElementById('analysis-view'),
+    viewToggleBtn: document.getElementById('view-toggle-btn'),
+    todayFocusBtn: document.getElementById('today-focus-btn'),
+    analysisDateText: document.getElementById('analysis-date'),
+    focusChart: document.getElementById('focus-chart'),
+    analysisSessions: document.getElementById('analysis-sessions'),
+    prevDayBtn: document.getElementById('prev-day'),
+    nextDayBtn: document.getElementById('next-day'),
     // Quote
     quoteText: document.getElementById('quote-text'),
     quoteAuthor: document.getElementById('quote-author'),
@@ -244,11 +256,66 @@ elements.newQuoteBtn.addEventListener('click', fetchQuote);
 // --- CALENDAR & HISTORY ---
 function saveSession(minutes, task) {
     const today = getLocalDate();
-    state.sessions.push({ date: today, minutes, task });
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    state.sessions.push({ date: today, minutes, task, time: timestamp });
     localStorage.setItem('cozySessions', JSON.stringify(state.sessions));
     renderCalendar();
+    renderAnalysis();
     renderStars();
     renderTree();
+}
+
+function toggleHistoryView() {
+    state.analysis.view = state.analysis.view === 'calendar' ? 'analysis' : 'calendar';
+    elements.calendarView.classList.toggle('hidden', state.analysis.view !== 'calendar');
+    elements.analysisView.classList.toggle('hidden', state.analysis.view !== 'analysis');
+    
+    const icon = elements.viewToggleBtn.querySelector('i');
+    if (state.analysis.view === 'analysis') {
+        icon.className = 'fas fa-calendar-alt';
+        renderAnalysis();
+    } else {
+        icon.className = 'fas fa-chart-line';
+        renderCalendar();
+    }
+}
+
+function renderAnalysis() {
+    const targetDate = state.analysis.currentDate;
+    const isToday = targetDate === getLocalDate();
+    elements.analysisDateText.innerText = isToday ? 'Today' : targetDate;
+
+    const daySessions = state.sessions.filter(s => s.date === targetDate);
+    
+    // Render Chart (24 bars for 24 hours)
+    elements.focusChart.innerHTML = '';
+    const hourlyData = new Array(24).fill(0);
+    daySessions.forEach(s => {
+        const hour = parseInt(s.time?.split(':')[0]) || 0;
+        hourlyData[hour] += s.minutes;
+    });
+
+    const maxMins = Math.max(...hourlyData, 30); // At least 30 for scale
+    hourlyData.forEach((mins, hour) => {
+        const bar = document.createElement('div');
+        bar.className = 'chart-bar';
+        bar.style.height = `${(mins / maxMins) * 100}%`;
+        bar.setAttribute('data-time', `${hour}:00 - ${mins}m`);
+        elements.focusChart.appendChild(bar);
+    });
+
+    // Render Sessions List
+    elements.analysisSessions.innerHTML = '';
+    if (daySessions.length === 0) {
+        elements.analysisSessions.innerHTML = '<li class="session-item"><span>No sessions recorded</span></li>';
+    } else {
+        daySessions.slice().reverse().forEach(s => {
+            const li = document.createElement('li');
+            li.className = 'session-item';
+            li.innerHTML = `<span>${s.time || '--'} - ${s.task}</span> <span>${s.minutes}m</span>`;
+            elements.analysisSessions.appendChild(li);
+        });
+    }
 }
 
 function renderCalendar() {
@@ -598,6 +665,28 @@ function init() {
 
     renderStars();
     updatePet();
+
+    // History & Analysis listeners
+    elements.viewToggleBtn.addEventListener('click', toggleHistoryView);
+    elements.todayFocusBtn.addEventListener('click', () => {
+        state.analysis.currentDate = getLocalDate();
+        state.analysis.view = 'calendar'; // Set to flip to analysis
+        toggleHistoryView();
+    });
+
+    elements.prevDayBtn.addEventListener('click', () => {
+        const d = new Date(state.analysis.currentDate);
+        d.setDate(d.getDate() - 1);
+        state.analysis.currentDate = getLocalDate(d);
+        renderAnalysis();
+    });
+
+    elements.nextDayBtn.addEventListener('click', () => {
+        const d = new Date(state.analysis.currentDate);
+        d.setDate(d.getDate() + 1);
+        state.analysis.currentDate = getLocalDate(d);
+        renderAnalysis();
+    });
 }
 
 init();

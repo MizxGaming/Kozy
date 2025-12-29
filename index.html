@@ -40,12 +40,29 @@
             <div class="glass-panel history-panel">
                 <div class="panel-header">
                     <h3>Focus History</h3>
+                    <button id="view-toggle-btn" class="icon-btn-small" title="Toggle View"><i class="fas fa-chart-line"></i></button>
                 </div>
-                <div id="mini-calendar" class="mini-calendar"></div>
-                <div class="daily-stats">
-                    <span id="today-focus">0m focused today</span>
+                
+                <!-- Calendar View -->
+                <div id="calendar-view" class="history-view">
+                    <div id="mini-calendar" class="mini-calendar"></div>
+                    <button id="today-focus-btn" class="stats-btn">
+                        <span id="today-focus">0m focused today</span>
+                    </button>
                 </div>
-                <ul id="session-history" class="session-history"></ul>
+
+                <!-- Analysis View -->
+                <div id="analysis-view" class="history-view hidden">
+                    <div class="analysis-header">
+                        <button id="prev-day"><i class="fas fa-chevron-left"></i></button>
+                        <span id="analysis-date">Today</span>
+                        <button id="next-day"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="analysis-chart" id="focus-chart">
+                        <!-- Bars injected by JS -->
+                    </div>
+                    <ul id="analysis-sessions" class="session-history"></ul>
+                </div>
             </div>
 
             <!-- Widget: Focus Toys (Bottom) -->

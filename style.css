@@ -213,8 +213,18 @@ body {
 }
 
 .history-panel {
-    flex: 0 0 auto;
+    flex: 0 0 320px; /* Increased base height to fully show 4 rows + button */
     padding: 20px;
+    transition: flex 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    perspective: 1000px;
+}
+
+.history-panel.expanded {
+    flex: 1;
 }
 
 .toys-panel {
@@ -223,6 +233,24 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    transition: flex 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.4s ease, 
+                transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.6s ease,
+                margin 0.6s ease;
+    opacity: 1;
+    transform: translateY(0);
+    transform-origin: top;
+}
+
+.toys-panel.collapsed {
+    flex: 0 0 0px;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: -20px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(100px) scale(0.95); /* Roll down and shrink */
 }
 
 .panel-header {
@@ -583,20 +611,36 @@ body {
     box-shadow: 0 0 10px var(--accent);
 }
 
-.history-panel {
-    display: flex;
-    flex-direction: column;
-}
-
 .history-view {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), filter 0.6s ease;
+    opacity: 1;
+    transform: translateZ(0) scale(1);
+    position: relative;
+    backface-visibility: hidden;
 }
 
-.history-view.hidden {
-    display: none !important;
+/* Fading Inward (scaling down into the screen) */
+.history-view.hidden-inward {
+    opacity: 0 !important;
+    pointer-events: none;
+    transform: translateZ(-100px) scale(0.9);
+    filter: blur(5px);
+    position: absolute;
+    width: calc(100% - 40px);
+}
+
+/* Coming from Outside (scaling up from the screen) */
+.history-view.hidden-outward {
+    opacity: 0 !important;
+    pointer-events: none;
+    transform: translateZ(100px) scale(1.1);
+    filter: blur(5px);
+    position: absolute;
+    width: calc(100% - 40px);
 }
 
 .stats-btn {

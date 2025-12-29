@@ -43,6 +43,8 @@ const elements = {
     addTodoBtn: document.getElementById('add-todo'),
     todoList: document.getElementById('todo-list'),
     // Calendar & Analysis
+    historyPanel: document.querySelector('.history-panel'),
+    toysPanel: document.querySelector('.toys-panel'),
     calendarGrid: document.getElementById('mini-calendar'),
     todayFocus: document.getElementById('today-focus'),
     calendarView: document.getElementById('calendar-view'),
@@ -267,17 +269,36 @@ function saveSession(minutes, task) {
 
 function toggleHistoryView() {
     state.analysis.view = state.analysis.view === 'calendar' ? 'analysis' : 'calendar';
-    elements.calendarView.classList.toggle('hidden', state.analysis.view !== 'calendar');
-    elements.analysisView.classList.toggle('hidden', state.analysis.view !== 'analysis');
     
-    const icon = elements.viewToggleBtn.querySelector('i');
-    if (state.analysis.view === 'analysis') {
-        icon.className = 'fas fa-calendar-alt';
+    const isAnalysis = state.analysis.view === 'analysis';
+    
+    // Toggle classes for panel expansion
+    elements.historyPanel.classList.toggle('expanded', isAnalysis);
+    elements.toysPanel.classList.toggle('collapsed', isAnalysis);
+    
+    // Depth animation logic
+    if (isAnalysis) {
+        // Calendar fades inward, Analysis comes from outward
+        elements.calendarView.classList.add('hidden-inward');
+        elements.calendarView.classList.remove('hidden-outward');
+        
+        elements.analysisView.classList.remove('hidden-inward');
+        elements.analysisView.classList.remove('hidden-outward');
+        
         renderAnalysis();
     } else {
-        icon.className = 'fas fa-chart-line';
+        // Analysis fades inward, Calendar comes from outward
+        elements.analysisView.classList.add('hidden-inward');
+        elements.analysisView.classList.remove('hidden-outward');
+        
+        elements.calendarView.classList.remove('hidden-inward');
+        elements.calendarView.classList.remove('hidden-outward');
+        
         renderCalendar();
     }
+    
+    const icon = elements.viewToggleBtn.querySelector('i');
+    icon.className = isAnalysis ? 'fas fa-calendar-alt' : 'fas fa-chart-line';
 }
 
 function renderAnalysis() {
@@ -766,6 +787,10 @@ function init() {
     updateTimerDisplay();
     setWallpaper(state.settings.bg);
     initWidgets();
+    
+    // Ensure initial history view state with new depth classes
+    elements.calendarView.classList.remove('hidden-inward', 'hidden-outward');
+    elements.analysisView.classList.add('hidden-outward');
     
     try {
         initMixer();

@@ -70,8 +70,8 @@
                 <div class="panel-header">
                     <h3>Toys</h3>
                     <div class="widget-switcher">
+                        <button id="toy-info-btn" class="icon-btn-small" title="Toy Info"><i class="fas fa-question-circle"></i></button>
                         <button class="switch-btn active" data-widget="tree" title="Tree"><i class="fas fa-seedling"></i></button>
-                        <button class="switch-btn" data-widget="tape" title="Tape"><i class="fas fa-compact-disc"></i></button>
                         <button class="switch-btn" data-widget="mixer" title="Mixer"><i class="fas fa-sliders-h"></i></button>
                         <button class="switch-btn" data-widget="stars" title="Stars"><i class="fas fa-star"></i></button>
                         <button class="switch-btn" data-widget="pet" title="Pet"><i class="fas fa-robot"></i></button>
@@ -79,22 +79,16 @@
                     </div>
                 </div>
 
+                <div id="toy-drawer" class="toy-drawer">
+                    <h4 id="toy-drawer-title">Focus Tree</h4>
+                    <p id="toy-drawer-desc">Watch your progress grow from a tiny seed into a flowering tree as you focus.</p>
+                </div>
+
                 <div id="widget-display" class="widget-display">
                     <!-- Tree Widget -->
                     <div id="widget-tree" class="widget-content">
                         <div class="tree-container">
                             <div class="tree-stage" id="tree-display"></div>
-                        </div>
-                    </div>
-
-                    <!-- Tape Widget -->
-                    <div id="widget-tape" class="widget-content hidden">
-                        <div class="tape-container">
-                            <div class="cassette">
-                                <div class="reel left-reel"></div>
-                                <div class="reel right-reel"></div>
-                                <div class="label" id="tape-label">SPACE FOCUS</div>
-                            </div>
                         </div>
                     </div>
 

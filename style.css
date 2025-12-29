@@ -125,9 +125,57 @@ body {
     color: var(--text-secondary);
 }
 
+.toys-panel {
+    position: relative;
+    z-index: 2;
+}
+
+.toy-drawer {
+    position: absolute;
+    top: 10px;
+    left: -150px; /* Reduced width offset */
+    width: 140px; /* Narrower */
+    min-height: 200px; /* Taller */
+    background: rgba(20, 20, 20, 0.7);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px 0 0 12px;
+    padding: 20px 15px; /* More vertical padding */
+    z-index: -1;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
+    opacity: 0;
+}
+
+.toy-drawer.open {
+    transform: translateX(-5px); /* Slide out just enough */
+    opacity: 1;
+    pointer-events: all;
+}
+
+.toy-drawer h4 {
+    margin: 0 0 8px 0;
+    color: var(--accent);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.toy-drawer p {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
+}
+
+#toy-info-btn {
+    margin-right: 10px;
+}
+
 .widget-switcher {
     display: flex;
-    gap: 8px;
+    align-items: center;
 }
 
 .switch-btn {

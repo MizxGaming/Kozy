@@ -66,11 +66,13 @@ const elements = {
     switchBtns: document.querySelectorAll('.switch-btn'),
     widgetContents: document.querySelectorAll('.widget-content'),
     treeDisplay: document.getElementById('tree-display'),
-    cassette: document.querySelector('.cassette'),
-    tapeLabel: document.getElementById('tape-label'),
     starsDisplay: document.getElementById('stars-display'),
     petDisplay: document.getElementById('pet-display'),
     petStatus: document.getElementById('pet-status'),
+    toyInfoBtn: document.getElementById('toy-info-btn'),
+    toyDrawer: document.getElementById('toy-drawer'),
+    toyDrawerTitle: document.getElementById('toy-drawer-title'),
+    toyDrawerDesc: document.getElementById('toy-drawer-desc'),
 };
 
 
@@ -172,7 +174,6 @@ function finishTimer() {
     state.timer.running = false;
     elements.startBtn.innerHTML = '<i class="fas fa-play"></i>';
     elements.status.innerText = "Session Complete";
-    elements.cassette.classList.remove('spinning');
     updatePet();
     
     saveSession(state.timer.initialMinutes, elements.taskSelect.value || "Just Focus");
@@ -187,7 +188,6 @@ elements.startBtn.addEventListener('click', () => {
         state.timer.running = false;
         elements.startBtn.innerHTML = '<i class="fas fa-play"></i>';
         elements.status.innerText = "Paused";
-        elements.cassette.classList.remove('spinning');
         updatePet();
     } else {
         if (!state.timer.timeLeft || state.timer.timeLeft === state.timer.totalSeconds) {
@@ -210,7 +210,6 @@ elements.startBtn.addEventListener('click', () => {
         state.timer.running = true;
         elements.startBtn.innerHTML = '<i class="fas fa-pause"></i>';
         elements.status.innerText = elements.taskSelect.value ? `Focusing on: ${elements.taskSelect.value}` : "Focusing...";
-        elements.cassette.classList.add('spinning');
         updatePet();
     }
 });
@@ -222,7 +221,6 @@ elements.resetBtn.addEventListener('click', () => {
     updateTimerDisplay();
     elements.startBtn.innerHTML = '<i class="fas fa-play"></i>';
     elements.status.innerText = "Ready";
-    elements.cassette.classList.remove('spinning');
     updatePet();
 });
 
@@ -450,6 +448,22 @@ elements.bgUpload.addEventListener('change', (e) => {
 
 
 // --- MODULAR WIDGETS ---
+const toyDescriptions = {
+    tree: { title: "Focus Tree", desc: "Watch your progress grow from a tiny seed into a flowering tree as you focus." },
+    mixer: { title: "Zen Mixer", desc: "Craft your perfect ambient atmosphere by blending rain, wind, cafe, and fire sounds." },
+    stars: { title: "Focus Stars", desc: "Build your own constellation; a new star is born for every 5 minutes of focused work." },
+    pet: { title: "Focus Pet", desc: "A tiny robot companion that stays active while you work and rests when you're done." },
+    pulse: { title: "Focus Pulse", desc: "A gentle visual rhythm designed to help you synchronize your breathing and stay calm." }
+};
+
+function updateToyDrawer() {
+    const data = toyDescriptions[state.settings.activeWidget];
+    if (data) {
+        elements.toyDrawerTitle.innerText = data.title;
+        elements.toyDrawerDesc.innerText = data.desc;
+    }
+}
+
 function initWidgets() {
     const switcher = document.querySelector('.widget-switcher');
     const widgetContents = document.querySelectorAll('.widget-content');
@@ -478,6 +492,20 @@ function initWidgets() {
         if (target === 'tree') renderTree();
         if (target === 'stars') renderStars();
         if (target === 'pet') updatePet();
+
+        // Update drawer content
+        updateToyDrawer();
+    });
+
+    // Info button toggle
+    elements.toyInfoBtn.addEventListener('click', () => {
+        elements.toyDrawer.classList.toggle('open');
+        const icon = elements.toyInfoBtn.querySelector('i');
+        if (elements.toyDrawer.classList.contains('open')) {
+            icon.className = 'fas fa-times-circle';
+        } else {
+            icon.className = 'fas fa-question-circle';
+        }
     });
 
     // Restore initial widget
@@ -548,12 +576,6 @@ function renderTree() {
 
     elements.treeDisplay.innerHTML = trees[stage];
 }
-
-function updateTapeLabel() {
-    const task = elements.taskSelect.value || "SPACE FOCUS";
-    elements.tapeLabel.innerText = task.toUpperCase();
-}
-elements.taskSelect.addEventListener('change', updateTapeLabel);
 
 
 // --- ZEN MIXER (AUDIO) ---

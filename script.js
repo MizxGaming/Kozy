@@ -548,48 +548,63 @@ window.addEventListener('keydown', (e) => {
 const constellations = [
     {
         name: "Ursa Minor",
-        stars: [[80, 20], [70, 35], [60, 40], [50, 45], [45, 60], [30, 70], [25, 55]],
-        lines: [[0,1], [1,2], [2,3], [3,4], [4,5], [5,6], [6,4]]
-    },
-    {
-        name: "Cygnus",
-        stars: [[50, 15], [50, 40], [50, 70], [50, 90], [20, 40], [80, 40]],
-        lines: [[0,1], [1,2], [2,3], [4,1], [1,5]]
-    },
-    {
-        name: "Lyra",
-        stars: [[30, 20], [50, 25], [60, 45], [50, 65], [35, 60]],
-        lines: [[0,1], [1,2], [2,3], [3,4], [4,1]]
-    },
-    {
-        name: "Cassiopeia",
-        stars: [[20, 30], [35, 50], [50, 35], [65, 55], [80, 40]],
-        lines: [[0,1], [1,2], [2,3], [3,4]]
-    },
-    {
-        name: "Orion",
-        stars: [[30, 20], [70, 25], [50, 45], [45, 50], [55, 48], [35, 80], [65, 75]],
-        lines: [[0,2], [1,2], [2,3], [3,4], [2,4], [3,5], [4,6]]
-    },
-    {
-        name: "Big Dipper",
-        stars: [[15, 40], [30, 35], [45, 45], [55, 60], [80, 65], [85, 85], [60, 80]],
+        stars: [[85, 20], [75, 25], [65, 30], [55, 32], [50, 45], [30, 50], [35, 35]], 
         lines: [[0,1], [1,2], [2,3], [3,4], [4,5], [5,6], [6,3]]
     },
     {
-        name: "Draco",
-        stars: [[20, 20], [30, 15], [45, 25], [40, 45], [60, 50], [75, 40], [85, 55], [70, 70], [55, 85]],
-        lines: [[0,1], [1,2], [2,3], [3,4], [4,5], [5,6], [6,7], [7,8]]
+        name: "Orion",
+        stars: [[30, 20], [70, 25], [45, 50], [50, 49], [55, 48], [35, 80], [65, 75]], 
+        lines: [[0,2], [1,4], [2,3], [3,4], [2,5], [4,6], [0,1], [5,6]]
     },
     {
-        name: "Hercules",
-        stars: [[40, 30], [60, 25], [65, 45], [45, 50], [35, 70], [70, 75], [30, 20], [75, 15]],
-        lines: [[0,1], [1,2], [2,3], [3,0], [0,6], [1,7], [3,4], [2,5]]
+        name: "Cassiopeia",
+        stars: [[10, 20], [30, 50], [50, 30], [70, 50], [90, 20]],
+        lines: [[0,1], [1,2], [2,3], [3,4]]
     },
     {
-        name: "Pegasus",
-        stars: [[30, 30], [60, 30], [60, 60], [30, 60], [15, 20], [10, 45], [75, 20]],
-        lines: [[0,1], [1,2], [2,3], [3,0], [0,4], [4,5], [1,6]]
+        name: "Big Dipper",
+        stars: [[10, 30], [25, 35], [40, 45], [55, 55], [80, 55], [80, 80], [55, 80]],
+        lines: [[0,1], [1,2], [2,3], [3,4], [4,5], [5,6], [6,3]]
+    },
+    {
+        name: "Scorpius",
+        stars: [[80, 20], [75, 28], [70, 35], [65, 45], [60, 55], [55, 65], [50, 75], [40, 80], [30, 75], [25, 65], [30, 55], [40, 50]],
+        lines: [[0,1], [1,2], [2,3], [3,4], [4,5], [5,6], [6,7], [7,8], [8,9], [9,10], [10,11]]
+    },
+    {
+        name: "Gemini",
+        stars: [[30, 10], [70, 10], [35, 30], [65, 30], [30, 50], [70, 50], [20, 80], [40, 80], [60, 80], [80, 80]],
+        lines: [[0,2], [2,4], [4,6], [4,7], [1,3], [3,5], [5,8], [5,9]]
+    },
+    {
+        name: "Leo",
+        stars: [[70, 30], [60, 20], [50, 25], [45, 40], [50, 55], [80, 55], [90, 45], [20, 50], [10, 60]],
+        lines: [[0,1], [1,2], [2,3], [3,4], [4,0], [4,5], [5,6], [0,6], [4,7], [7,8]]
+    },
+    {
+        name: "Cygnus",
+        stars: [[50, 10], [50, 40], [50, 60], [50, 85], [20, 50], [80, 50]],
+        lines: [[0,1], [1,2], [2,3], [4,1], [1,5]]
+    },
+    {
+        name: "Taurus",
+        stars: [[50, 50], [60, 60], [40, 60], [30, 70], [70, 70], [20, 30], [80, 30]],
+        lines: [[0,1], [0,2], [2,3], [1,4], [2,5], [1,6]]
+    },
+    {
+        name: "Canis Major",
+        stars: [[50, 20], [45, 30], [55, 30], [50, 50], [30, 70], [70, 70], [50, 85]],
+        lines: [[0,1], [0,2], [1,3], [2,3], [3,4], [3,5], [3,6]]
+    },
+    {
+        name: "Aquarius",
+        stars: [[40, 10], [50, 20], [60, 20], [50, 35], [40, 40], [50, 50], [60, 55], [50, 65], [40, 70], [50, 80]],
+        lines: [[0,1], [1,2], [1,3], [3,4], [4,5], [5,6], [6,7], [7,8], [8,9]]
+    },
+    {
+        name: "Lyra",
+        stars: [[20, 20], [40, 25], [50, 45], [40, 65], [25, 60]],
+        lines: [[0,1], [1,2], [2,3], [3,4], [4,1]]
     }
 ];
 
@@ -605,12 +620,26 @@ function renderStars() {
     const ctx = canvas.getContext('2d');
     const today = getLocalDate();
     const mins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
-    const starCount = Math.floor(mins / 5); 
+    const totalStarsEarned = Math.floor(mins / 5); 
     
-    const constIdx = (Math.floor((starCount - 1) / 10) + state.stars.shuffleOffset) % constellations.length;
-    const currentConst = constellations[constIdx >= 0 ? constIdx : 0];
-    const starsInThisCycle = starCount === 0 ? 0 : (starCount - 1) % 10 + 1;
+    // View Logic: Cycle through constellations linearly
+    const viewIndex = state.stars.shuffleOffset % constellations.length;
+    const currentConst = constellations[viewIndex];
+    
+    // Calculate stars spent on previous constellations
+    let starsSpent = 0;
+    for (let i = 0; i < viewIndex; i++) {
+        starsSpent += constellations[i].stars.length;
+    }
+    
+    // Calculate progress for the current view
+    const availableForCurrent = Math.max(0, totalStarsEarned - starsSpent);
+    const starsInThisCycle = Math.min(availableForCurrent, currentConst.stars.length);
+    
     const isCompleted = starsInThisCycle >= currentConst.stars.length;
+    
+    // Use total earned for background intensity (capped)
+    const starCount = Math.min(totalStarsEarned, 300);
 
     if (bgStars.length !== starCount) {
         bgStars = [];

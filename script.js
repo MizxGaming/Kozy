@@ -618,8 +618,10 @@ function renderStars() {
             bgStars.push({
                 x: Math.random(),
                 y: Math.random(),
+                vx: (Math.random() - 0.5) * 0.0002, // Slow drift
+                vy: (Math.random() - 0.5) * 0.0002,
                 size: Math.random() * 1.5 + 0.5,
-                blinkSpeed: Math.random() * 0.02 + 0.005
+                blinkSpeed: Math.random() * 0.002 + 0.0005 
             });
         }
     }
@@ -638,10 +640,16 @@ function renderStars() {
         const h = rect.height;
         ctx.clearRect(0, 0, w, h);
 
-        // Background Stars
         const time = Date.now();
+
+        // Background Stars
         ctx.fillStyle = "white";
         bgStars.forEach(s => {
+            s.x += s.vx;
+            s.y += s.vy;
+            if (s.x < 0) s.x = 1; if (s.x > 1) s.x = 0;
+            if (s.y < 0) s.y = 1; if (s.y > 1) s.y = 0;
+
             const alpha = 0.2 + Math.abs(Math.sin(time * s.blinkSpeed + s.x * 10)) * 0.3;
             ctx.globalAlpha = alpha;
             ctx.beginPath();
@@ -663,26 +671,29 @@ function renderStars() {
         
         const cW = maxX - minX;
         const cH = maxY - minY;
-        // Padding: 40px
         const scale = Math.min((w - 60) / (cW * w / 100), (h - 80) / (cH * h / 100));
         
         const centerX = w / 2;
         const centerY = h / 2 - 10;
         
-        const project = (p) => {
-            const nx = (p[0] - minX - cW/2) * (w/100) * scale + centerX;
-            const ny = (p[1] - minY - cH/2) * (h/100) * scale + centerY;
+        const project = (p, index) => {
+            // Very slow, slight floating
+            const floatX = Math.sin(time * 0.0002 + index) * 2;
+            const floatY = Math.cos(time * 0.0003 + index) * 2;
+            
+            const nx = (p[0] - minX - cW/2) * (w/100) * scale + centerX + floatX;
+            const ny = (p[1] - minY - cH/2) * (h/100) * scale + centerY + floatY;
             return [nx, ny];
         };
 
         // Lines
         if (isCompleted) {
-             ctx.strokeStyle = "rgba(255,255,255,0.15)";
-             ctx.lineWidth = 1;
+             ctx.strokeStyle = "rgba(255,255,255,0.4)";
+             ctx.lineWidth = 1.5;
              ctx.beginPath();
              currentConst.lines.forEach(l => {
-                 const p1 = project(currentConst.stars[l[0]]);
-                 const p2 = project(currentConst.stars[l[1]]);
+                 const p1 = project(currentConst.stars[l[0]], l[0]);
+                 const p2 = project(currentConst.stars[l[1]], l[1]);
                  ctx.moveTo(p1[0], p1[1]);
                  ctx.lineTo(p2[0], p2[1]);
              });
@@ -706,10 +717,10 @@ function renderStars() {
         // Main Stars
         currentConst.stars.forEach((p, i) => {
             if (i < starsInThisCycle || isCompleted) {
-                const pos = project(p);
+                const pos = project(p, i);
                 const alpha = 0.5 + Math.abs(Math.sin(time * 0.002 + i)) * 0.5;
                 
-                const grad = ctx.createRadialGradient(pos[0], pos[1], 1, pos[0], pos[1], 8);
+                const grad = ctx.createRadialGradient(pos[0], pos[1], 1, pos[0], pos[1], 6);
                 grad.addColorStop(0, "white");
                 grad.addColorStop(0.4, "rgba(255,255,255,0.8)");
                 grad.addColorStop(1, "rgba(255,255,255,0)");
@@ -717,7 +728,13 @@ function renderStars() {
                 ctx.globalAlpha = alpha;
                 ctx.fillStyle = grad;
                 ctx.beginPath();
-                ctx.arc(pos[0], pos[1], 8, 0, Math.PI*2);
+                ctx.arc(pos[0], pos[1], 6, 0, Math.PI*2);
+                ctx.fill();
+                
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(pos[0], pos[1], 2, 0, Math.PI*2);
                 ctx.fill();
             }
         });
@@ -918,9 +935,19 @@ function init() {
     });
 
     elements.shuffleStarsBtn.addEventListener('click', () => {
-        state.stars.shuffleOffset = (state.stars.shuffleOffset + 1) % constellations.length;
-        localStorage.setItem('cozyStarsOffset', state.stars.shuffleOffset);
-        renderStars();
+        elements.starsCanvas.style.transition = 'opacity 0.5s ease';
+        elements.starsCanvas.style.opacity = '0';
+        
+        setTimeout(() => {
+            state.stars.shuffleOffset = (state.stars.shuffleOffset + 1) % constellations.length;
+            localStorage.setItem('cozyStarsOffset', state.stars.shuffleOffset);
+            
+            // Reset background stars for new pattern
+            bgStars = [];
+            renderStars();
+            
+            elements.starsCanvas.style.opacity = '1';
+        }, 500);
     });
 
     // Timer presets

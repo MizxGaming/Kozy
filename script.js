@@ -70,7 +70,7 @@ const elements = {
     // Modular Widgets
     switchBtns: document.querySelectorAll('.switch-btn'),
     widgetContents: document.querySelectorAll('.widget-content'),
-    starsDisplay: document.getElementById('stars-display'),
+    starsCanvas: document.getElementById('stars-canvas'),
     shuffleStarsBtn: document.getElementById('shuffle-stars'),
     petDisplay: document.getElementById('pet-display'),
     petStatus: document.getElementById('pet-status'),
@@ -593,84 +593,138 @@ const constellations = [
     }
 ];
 
+let starAnimFrame = null;
+let bgStars = [];
+
 function renderStars() {
+    const canvas = elements.starsCanvas;
+    if (!canvas) return;
+
+    if (starAnimFrame) cancelAnimationFrame(starAnimFrame);
+
+    const ctx = canvas.getContext('2d');
     const today = getLocalDate();
     const mins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
     const starCount = Math.floor(mins / 5); 
     
-    elements.starsDisplay.innerHTML = '';
-    
-    // Always calculate which constellation we are looking at
     const constIdx = (Math.floor((starCount - 1) / 10) + state.stars.shuffleOffset) % constellations.length;
     const currentConst = constellations[constIdx >= 0 ? constIdx : 0];
     const starsInThisCycle = starCount === 0 ? 0 : (starCount - 1) % 10 + 1;
     const isCompleted = starsInThisCycle >= currentConst.stars.length;
 
-    // SVG layer for lines
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("class", "constellation-svg");
-    elements.starsDisplay.appendChild(svg);
-
-    const nameTag = document.createElement('div');
-    nameTag.className = 'constellation-name visible';
-    
-    const displayCount = Math.min(starsInThisCycle, currentConst.stars.length);
-    const totalCount = currentConst.stars.length;
-    
-    nameTag.innerHTML = `${currentConst.name}<br><span class="constellation-progress">${displayCount} / ${totalCount} stars</span>`;
-    nameTag.style.opacity = isCompleted ? "0.8" : "0.5"; 
-    elements.starsDisplay.appendChild(nameTag);
-
-    if (starCount === 0) return;
-
-    // Render stars of the current pattern
-    currentConst.stars.forEach((pos, i) => {
-        if (i < starsInThisCycle || isCompleted) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.width = '3px';
-            star.style.height = '3px';
-            star.style.left = `${pos[0]}%`;
-            star.style.top = `${pos[1]}%`;
-            star.style.boxShadow = '0 0 8px #fff';
-            star.style.animationDelay = `${i * 0.5}s`;
-            elements.starsDisplay.appendChild(star);
+    if (bgStars.length !== starCount) {
+        bgStars = [];
+        for(let i=0; i<starCount; i++) {
+            bgStars.push({
+                x: Math.random(),
+                y: Math.random(),
+                size: Math.random() * 1.5 + 0.5,
+                blinkSpeed: Math.random() * 0.02 + 0.005
+            });
         }
-    });
+    }
 
-    // Draw lines and show name if completed
-    if (isCompleted) {
-        currentConst.lines.forEach(line => {
-            const p1 = currentConst.stars[line[0]];
-            const p2 = currentConst.stars[line[1]];
-            const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            l.setAttribute("x1", `${p1[0]}%`);
-            l.setAttribute("y1", `${p1[1]}%`);
-            l.setAttribute("x2", `${p2[0]}%`);
-            l.setAttribute("y2", `${p2[1]}%`);
-            l.setAttribute("class", "constellation-line");
-            svg.appendChild(l);
+    function draw() {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        
+        if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+        }
+        
+        const w = rect.width;
+        const h = rect.height;
+        ctx.clearRect(0, 0, w, h);
+
+        // Background Stars
+        const time = Date.now();
+        ctx.fillStyle = "white";
+        bgStars.forEach(s => {
+            const alpha = 0.2 + Math.abs(Math.sin(time * s.blinkSpeed + s.x * 10)) * 0.3;
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+            ctx.arc(s.x * w, s.y * h, s.size, 0, Math.PI*2);
+            ctx.fill();
+        });
+
+        if (starCount === 0) {
+            starAnimFrame = requestAnimationFrame(draw);
+            return;
+        }
+
+        // Calculate Bounding Box
+        let minX = 100, maxX = 0, minY = 100, maxY = 0;
+        currentConst.stars.forEach(p => {
+             minX = Math.min(minX, p[0]); maxX = Math.max(maxX, p[0]);
+             minY = Math.min(minY, p[1]); maxY = Math.max(maxY, p[1]);
         });
         
-        nameTag.innerText = currentConst.name;
-        nameTag.classList.add('visible');
-    }
+        const cW = maxX - minX;
+        const cH = maxY - minY;
+        // Padding: 40px
+        const scale = Math.min((w - 60) / (cW * w / 100), (h - 80) / (cH * h / 100));
+        
+        const centerX = w / 2;
+        const centerY = h / 2 - 10;
+        
+        const project = (p) => {
+            const nx = (p[0] - minX - cW/2) * (w/100) * scale + centerX;
+            const ny = (p[1] - minY - cH/2) * (h/100) * scale + centerY;
+            return [nx, ny];
+        };
 
-    // Fill the rest of the space with "background dust" proportional to focus time
-    // This ensures that even as patterns change, the sky stays populated
-    const totalBackgroundStars = starCount; 
-    for (let i = 0; i < totalBackgroundStars; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        const size = Math.random() * 2 + 0.5;
-        star.style.width = `${size}px`;
-        star.style.height = `${size}px`;
-        star.style.left = `${Math.random() * 100}%`;
-        star.style.top = `${Math.random() * 100}%`;
-        star.style.opacity = '0.3';
-        star.style.animationDelay = `${Math.random() * 3}s`;
-        elements.starsDisplay.appendChild(star);
+        // Lines
+        if (isCompleted) {
+             ctx.strokeStyle = "rgba(255,255,255,0.15)";
+             ctx.lineWidth = 1;
+             ctx.beginPath();
+             currentConst.lines.forEach(l => {
+                 const p1 = project(currentConst.stars[l[0]]);
+                 const p2 = project(currentConst.stars[l[1]]);
+                 ctx.moveTo(p1[0], p1[1]);
+                 ctx.lineTo(p2[0], p2[1]);
+             });
+             ctx.stroke();
+
+             ctx.globalAlpha = 0.8;
+             ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+             ctx.font = "bold 12px Quicksand";
+             ctx.textAlign = "center";
+             ctx.fillText(currentConst.name, w/2, h - 15);
+        } else {
+             const displayCount = Math.min(starsInThisCycle, currentConst.stars.length);
+             const total = currentConst.stars.length;
+             ctx.globalAlpha = 0.5;
+             ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+             ctx.font = "10px Quicksand";
+             ctx.textAlign = "center";
+             ctx.fillText(`${currentConst.name} (${displayCount}/${total})`, w/2, h - 15);
+        }
+
+        // Main Stars
+        currentConst.stars.forEach((p, i) => {
+            if (i < starsInThisCycle || isCompleted) {
+                const pos = project(p);
+                const alpha = 0.5 + Math.abs(Math.sin(time * 0.002 + i)) * 0.5;
+                
+                const grad = ctx.createRadialGradient(pos[0], pos[1], 1, pos[0], pos[1], 8);
+                grad.addColorStop(0, "white");
+                grad.addColorStop(0.4, "rgba(255,255,255,0.8)");
+                grad.addColorStop(1, "rgba(255,255,255,0)");
+                
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(pos[0], pos[1], 8, 0, Math.PI*2);
+                ctx.fill();
+            }
+        });
+        
+        starAnimFrame = requestAnimationFrame(draw);
     }
+    draw();
 }
 
 function updatePet() {

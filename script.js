@@ -72,6 +72,10 @@ const elements = {
     widgetContents: document.querySelectorAll('.widget-content'),
     starsCanvas: document.getElementById('stars-canvas'),
     shuffleStarsBtn: document.getElementById('shuffle-stars'),
+    starsInfoBtn: document.getElementById('stars-info-btn'),
+    starsModal: document.getElementById('stars-modal'),
+    closeStarsModal: document.getElementById('close-stars-modal'),
+    starsHierarchyList: document.getElementById('stars-hierarchy-list'),
     petDisplay: document.getElementById('pet-display'),
     petStatus: document.getElementById('pet-status'),
     toyInfoBtn: document.getElementById('toy-info-btn'),
@@ -408,14 +412,70 @@ function updateAccentColor(url) {
         ctx.drawImage(img, 0, 0, 1, 1);
         const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
         // Lighten the color for accent
-        const accent = `rgb(${Math.min(r + 80, 255)}, ${Math.min(g + 80, 255)}, ${Math.min(b + 80, 255)})`;
+        const r1 = Math.min(r + 80, 255);
+        const g1 = Math.min(g + 80, 255);
+        const b1 = Math.min(b + 80, 255);
+        const accent = `rgb(${r1}, ${g1}, ${b1})`;
+        const accentRGB = `${r1}, ${g1}, ${b1}`;
         document.documentElement.style.setProperty('--accent', accent);
+        document.documentElement.style.setProperty('--accent-rgb', accentRGB);
         localStorage.setItem('cozyAccent', accent);
     };
 }
 
 elements.settingsBtn.addEventListener('click', () => elements.settingsModal.classList.remove('hidden'));
 elements.closeSettingsBtn.addEventListener('click', () => elements.settingsModal.classList.add('hidden'));
+
+// --- Stars Hierarchy Modal ---
+function populateStarsHierarchy() {
+    const today = getLocalDate();
+    const mins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
+    const totalStarsEarned = Math.floor(mins / 5);
+
+    elements.starsHierarchyList.innerHTML = '';
+    let cumulativeStars = 0;
+
+    constellations.forEach((c, i) => {
+        cumulativeStars += c.stars.length;
+        const isUnlocked = totalStarsEarned >= (cumulativeStars - c.stars.length + 1);
+        const isCompleted = totalStarsEarned >= cumulativeStars;
+        
+        const item = document.createElement('div');
+        item.className = `hierarchy-item ${isCompleted ? 'unlocked' : ''}`;
+        
+        let progressText = '';
+        if (isCompleted) {
+            progressText = `<i class="fas fa-check-circle"></i> Completed`;
+        } else if (isUnlocked) {
+            const earnedForThis = totalStarsEarned - (cumulativeStars - c.stars.length);
+            progressText = `<i class="fas fa-star"></i> ${earnedForThis}/${c.stars.length} stars`;
+        } else {
+            progressText = `<i class="fas fa-lock"></i> Unlocks at ${cumulativeStars - c.stars.length} stars`;
+        }
+
+        item.innerHTML = `
+            <div class="hierarchy-name">${i + 1}. ${c.name}</div>
+            <div class="hierarchy-info">
+                <div>${c.stars.length} stars (${c.stars.length * 5} mins)</div>
+                <div style="font-size: 0.75rem; opacity: 0.8">${progressText}</div>
+            </div>
+        `;
+        elements.starsHierarchyList.appendChild(item);
+    });
+}
+
+elements.starsInfoBtn.addEventListener('click', () => {
+    populateStarsHierarchy();
+    elements.starsModal.classList.remove('hidden');
+});
+elements.closeStarsModal.addEventListener('click', () => elements.starsModal.classList.add('hidden'));
+
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        elements.settingsModal.classList.add('hidden');
+        elements.starsModal.classList.add('hidden');
+    }
+});
 
 elements.userNameInput.value = state.settings.name;
 elements.userNameInput.addEventListener('input', (e) => {
@@ -687,6 +747,12 @@ function renderStars() {
         });
 
         if (starCount === 0) {
+            ctx.globalAlpha = 0.6;
+            ctx.fillStyle = "white";
+            ctx.font = "12px 'Space Mono', monospace";
+            ctx.textAlign = "center";
+            ctx.fillText("No stars earned today.", w/2, h/2 - 10);
+            ctx.fillText("Focus for 5 mins to start!", w/2, h/2 + 10);
             starAnimFrame = requestAnimationFrame(draw);
             return;
         }

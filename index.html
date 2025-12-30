@@ -98,10 +98,10 @@
 
                 <div id="toy-drawer" class="toy-drawer">
                     <h4 id="toy-drawer-title">Focus Tree</h4>
-                    <p id="toy-drawer-desc">Watch your progress grow from a tiny seed into a flowering tree as you focus.</p>
+                    <p id="toy-drawer-desc">Grow a tree by focusing for 25 minutes.</p>
                 </div>
 
-                <div id="widget-display" class="widget-display">
+                <div class="widget-display">
                     <!-- Mixer Widget -->
                     <div id="widget-mixer" class="widget-content hidden">
                         <div class="mixer-container">
@@ -207,25 +207,56 @@
         <button id="new-quote" title="New Quote"><i class="fas fa-sync-alt"></i></button>
     </div>
 
-    <!-- GitHub Link -->
-    <a href="https://github.com/MizxGaming/Kozy" target="_blank" class="github-toggle" title="GitHub Repository">
-        <i class="fab fa-github"></i>
-    </a>
+    <!-- Floating Action Buttons -->
+    <div class="floating-actions">
+        <button id="about-btn" class="action-btn" title="About Kozy">
+            <span class="kozy-logo">K</span>
+        </button>
+        <a href="https://github.com/MizxGaming/Kozy" target="_blank" class="action-btn" title="GitHub Repository">
+            <i class="fab fa-github"></i>
+        </a>
+        <button id="settings-btn" class="action-btn" title="Customize Theme">
+            <i class="fas fa-cog"></i>
+        </button>
+    </div>
 
-    <!-- Settings Button -->
-    <button id="settings-btn" class="settings-toggle" title="Customize Theme"><i class="fas fa-cog"></i></button>
-
-    <!-- Stars Legend Modal -->
-    <div id="stars-modal" class="modal hidden">
-        <div class="modal-content">
-            <button id="close-stars-modal" class="close-modal">&times;</button>
-            <h2>Star Hierarchy</h2>
+    <!-- Stars Hierarchy Window -->
+    <div id="stars-hierarchy-window" class="modal hidden">
+        <div class="modal-content stars-window-content">
+            <button id="close-stars-drawer" class="close-modal">&times;</button>
+            <div class="drawer-header">
+                <h2>Star Hierarchy</h2>
+            </div>
             <p class="modal-subtitle">1 star = 5 minutes of focus</p>
             <div id="stars-hierarchy-list" class="hierarchy-list">
                 <!-- Dynamically populated -->
             </div>
         </div>
     </div>
+
+    <!-- About Modal -->
+    <div id="about-modal" class="modal hidden">
+        <div class="modal-content about-content">
+            <button id="close-about-modal" class="close-modal">&times;</button>
+            <div class="about-header">
+                <div class="kozy-logo large">K</div>
+                <h2>About Kozy</h2>
+                <p class="modal-subtitle">v1.0.0 "Stardust"</p>
+            </div>
+            <div class="about-body">
+                <p>Kozy is a personalized focus dashboard designed to make productivity feel aesthetic and rewarding.</p>
+                <p>Built with focus on minimalism and user experience, Kozy combines essential tools like a countdown timer and to-do list with "Toys" that visualize your progress in beautiful ways.</p>
+                <div class="about-features">
+                    <div class="feature-item"><i class="fas fa-star"></i> <span>Build constellations as you work</span></div>
+                    <div class="feature-item"><i class="fas fa-robot"></i> <span>A digital companion for focus sessions</span></div>
+                    <div class="feature-item"><i class="fas fa-sliders-h"></i> <span>Immersive ambient sound mixer</span></div>
+                </div>
+                <p class="about-footer">Created with ❤️ for focus seekers.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stars Legend Modal (Removed standard modal, now handled by drawer) -->
 
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal hidden">

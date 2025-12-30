@@ -67,14 +67,18 @@ const elements = {
     presetBtns: document.querySelectorAll('.preset-btn'),
     bgUpload: document.getElementById('bg-upload'),
     userNameInput: document.getElementById('user-name'),
+    // About
+    aboutBtn: document.getElementById('about-btn'),
+    aboutModal: document.getElementById('about-modal'),
+    closeAboutModal: document.getElementById('close-about-modal'),
     // Modular Widgets
     switchBtns: document.querySelectorAll('.switch-btn'),
     widgetContents: document.querySelectorAll('.widget-content'),
     starsCanvas: document.getElementById('stars-canvas'),
     shuffleStarsBtn: document.getElementById('shuffle-stars'),
     starsInfoBtn: document.getElementById('stars-info-btn'),
-    starsModal: document.getElementById('stars-modal'),
-    closeStarsModal: document.getElementById('close-stars-modal'),
+    starsHierarchyWindow: document.getElementById('stars-hierarchy-window'),
+    closeStarsDrawer: document.getElementById('close-stars-drawer'),
     starsHierarchyList: document.getElementById('stars-hierarchy-list'),
     petDisplay: document.getElementById('pet-display'),
     petStatus: document.getElementById('pet-status'),
@@ -426,7 +430,60 @@ function updateAccentColor(url) {
 elements.settingsBtn.addEventListener('click', () => elements.settingsModal.classList.remove('hidden'));
 elements.closeSettingsBtn.addEventListener('click', () => elements.settingsModal.classList.add('hidden'));
 
-// --- Stars Hierarchy Modal ---
+// --- About Modal ---
+elements.aboutBtn.addEventListener('click', () => elements.aboutModal.classList.remove('hidden'));
+elements.closeAboutModal.addEventListener('click', () => elements.aboutModal.classList.add('hidden'));
+
+// --- Stars Hierarchy Drawer ---
+function populateStarsHierarchy() {
+    const today = getLocalDate();
+    const mins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
+    const totalStarsEarned = Math.floor(mins / 5);
+
+    elements.starsHierarchyList.innerHTML = '';
+    let cumulativeStars = 0;
+
+    constellations.forEach((c, i) => {
+        cumulativeStars += c.stars.length;
+        const isUnlocked = totalStarsEarned >= (cumulativeStars - c.stars.length + 1);
+        const isCompleted = totalStarsEarned >= cumulativeStars;
+        
+        const item = document.createElement('div');
+        item.className = `hierarchy-item ${isCompleted ? 'unlocked' : ''}`;
+        
+        let progressText = '';
+        if (isCompleted) {
+            progressText = `<i class="fas fa-check-circle"></i> Completed`;
+        } else if (isUnlocked) {
+            const earnedForThis = totalStarsEarned - (cumulativeStars - c.stars.length);
+            progressText = `<i class="fas fa-star"></i> ${earnedForThis}/${c.stars.length} stars`;
+        } else {
+            progressText = `<i class="fas fa-lock"></i> Unlocks at ${cumulativeStars - c.stars.length} stars`;
+        }
+
+        item.innerHTML = `
+            <div class="hierarchy-name">${i + 1}. ${c.name}</div>
+            <div class="hierarchy-info">
+                <div>${c.stars.length} stars (${c.stars.length * 5} mins)</div>
+                <div style="font-size: 0.75rem; opacity: 0.8">${progressText}</div>
+            </div>
+        `;
+        elements.starsHierarchyList.appendChild(item);
+    });
+}
+
+// --- Stars Hierarchy Window ---
+function closeStarsWindow() {
+    const win = elements.starsHierarchyWindow;
+    if (win.classList.contains('hidden')) return;
+    
+    win.classList.add('closing');
+    setTimeout(() => {
+        win.classList.add('hidden');
+        win.classList.remove('closing');
+    }, 260); // Match new 0.25s animation
+}
+
 function populateStarsHierarchy() {
     const today = getLocalDate();
     const mins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
@@ -466,14 +523,25 @@ function populateStarsHierarchy() {
 
 elements.starsInfoBtn.addEventListener('click', () => {
     populateStarsHierarchy();
-    elements.starsModal.classList.remove('hidden');
+    elements.starsHierarchyWindow.classList.remove('hidden');
+    elements.toyDrawer.classList.remove('open'); // Hide general info
 });
-elements.closeStarsModal.addEventListener('click', () => elements.starsModal.classList.add('hidden'));
+
+elements.closeStarsDrawer.addEventListener('click', closeStarsWindow);
+
+// Close on background click
+elements.starsHierarchyWindow.addEventListener('click', (e) => {
+    if (e.target === elements.starsHierarchyWindow) {
+        closeStarsWindow();
+    }
+});
 
 window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         elements.settingsModal.classList.add('hidden');
-        elements.starsModal.classList.add('hidden');
+        elements.aboutModal.classList.add('hidden');
+        closeStarsWindow();
+        elements.toyDrawer.classList.remove('open');
     }
 });
 
@@ -574,6 +642,12 @@ function initWidgets() {
             content.classList.toggle('hidden', !isTarget);
         });
 
+        // Close drawers when switching
+        closeStarsWindow();
+        elements.toyDrawer.classList.remove('open');
+        const infoIcon = elements.toyInfoBtn.querySelector('i');
+        if (infoIcon) infoIcon.className = 'fas fa-question-circle';
+
         // Trigger specific renders
         if (target === 'stars') renderStars();
         if (target === 'pet') updatePet();
@@ -585,6 +659,7 @@ function initWidgets() {
     // Info button toggle
     elements.toyInfoBtn.addEventListener('click', () => {
         elements.toyDrawer.classList.toggle('open');
+        closeStarsWindow(); // Close other window
         const icon = elements.toyInfoBtn.querySelector('i');
         if (elements.toyDrawer.classList.contains('open')) {
             icon.className = 'fas fa-times-circle';

@@ -4,7 +4,7 @@ const state = {
     sessions: JSON.parse(localStorage.getItem('cozySessions')) || [],
     settings: {
         name: localStorage.getItem('cozyName') || '',
-        bg: localStorage.getItem('cozyBg') || 'https://images.wallpapersden.com/image/download/anime-girl-looking-at-sky-scenery_bWlma2uUmZqaraWkpJRmbmdlrWZlbWU.jpg',
+        bg: localStorage.getItem('cozyBg') || 'wallpapers/default.jpg',
         activeWidget: localStorage.getItem('cozyActiveWidget') || 'mixer',
         dynamicColors: true,
     },

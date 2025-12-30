@@ -981,8 +981,25 @@ body {
 }
 
 .progress-ring__thumb {
-    transition: all 0.35s linear;
-    filter: drop-shadow(0 0 5px rgba(255,255,255,0.8));
+    transition: all 0.3s ease, cx 0.35s linear, cy 0.35s linear;
+    fill: rgba(255, 255, 255, 0.3); /* Darker when dormant */
+    filter: none;
+}
+
+.progress-ring__thumb.active {
+    fill: white;
+    filter: drop-shadow(0 0 10px white);
+}
+
+.progress-ring__thumb.pulsing {
+    fill: white;
+    filter: drop-shadow(0 0 8px white);
+    animation: thumbPulse 3s ease-in-out infinite;
+}
+
+@keyframes thumbPulse {
+    0%, 100% { filter: drop-shadow(0 0 5px white); }
+    50% { filter: drop-shadow(0 0 15px white); }
 }
 
 .time-container {

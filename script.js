@@ -192,6 +192,7 @@ function finishTimer() {
     state.timer.running = false;
     elements.startBtn.innerHTML = '<i class="fas fa-play"></i>';
     elements.status.innerText = "Session Complete";
+    elements.thumb.classList.remove('active', 'pulsing');
     updatePet();
     
     saveSession(state.timer.initialMinutes, elements.taskSelect.value || "Just Focus");
@@ -206,6 +207,14 @@ elements.startBtn.addEventListener('click', () => {
         state.timer.running = false;
         elements.startBtn.innerHTML = '<i class="fas fa-play"></i>';
         elements.status.innerText = "Paused";
+        
+        elements.thumb.classList.remove('active');
+        // Pulsate if midway, otherwise dormant
+        if (state.timer.timeLeft < state.timer.totalSeconds && state.timer.timeLeft > 0) {
+            elements.thumb.classList.add('pulsing');
+        } else {
+            elements.thumb.classList.remove('pulsing');
+        }
         updatePet();
     } else {
         if (!state.timer.timeLeft || state.timer.timeLeft === state.timer.totalSeconds) {
@@ -228,6 +237,9 @@ elements.startBtn.addEventListener('click', () => {
         state.timer.running = true;
         elements.startBtn.innerHTML = '<i class="fas fa-pause"></i>';
         elements.status.innerText = elements.taskSelect.value ? `Focusing on: ${elements.taskSelect.value}` : "Focusing...";
+        
+        elements.thumb.classList.add('active');
+        elements.thumb.classList.remove('pulsing');
         updatePet();
     }
 });
@@ -239,6 +251,7 @@ elements.resetBtn.addEventListener('click', () => {
     updateTimerDisplay();
     elements.startBtn.innerHTML = '<i class="fas fa-play"></i>';
     elements.status.innerText = "Ready";
+    elements.thumb.classList.remove('active', 'pulsing');
     updatePet();
 });
 

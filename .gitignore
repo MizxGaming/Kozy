@@ -8,3 +8,4 @@ Thumbs.db
 .gemini/
 gha-creds-*.json
 GEMINI.md
+.backups/

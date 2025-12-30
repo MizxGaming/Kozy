@@ -408,23 +408,39 @@ function setWallpaper(url) {
 function updateAccentColor(url) {
     if (!state.settings.dynamicColors) return;
     const img = new Image();
-    img.crossOrigin = "Anonymous";
+    
+    // Only use Anonymous for remote URLs to avoid CORS issues with local files
+    if (url.startsWith('http')) {
+        img.crossOrigin = "Anonymous";
+    }
+    
     img.src = url;
     img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 1, canvas.height = 1;
-        ctx.drawImage(img, 0, 0, 1, 1);
-        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-        // Lighten the color for accent
-        const r1 = Math.min(r + 80, 255);
-        const g1 = Math.min(g + 80, 255);
-        const b1 = Math.min(b + 80, 255);
-        const accent = `rgb(${r1}, ${g1}, ${b1})`;
-        const accentRGB = `${r1}, ${g1}, ${b1}`;
-        document.documentElement.style.setProperty('--accent', accent);
-        document.documentElement.style.setProperty('--accent-rgb', accentRGB);
-        localStorage.setItem('cozyAccent', accent);
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 1, canvas.height = 1;
+            ctx.drawImage(img, 0, 0, 1, 1);
+            const data = ctx.getImageData(0, 0, 1, 1).data;
+            const [r, g, b] = data;
+            
+            // Lighten the color for accent
+            const r1 = Math.min(r + 80, 255);
+            const g1 = Math.min(g + 80, 255);
+            const b1 = Math.min(b + 80, 255);
+            
+            const accent = `rgb(${r1}, ${g1}, ${b1})`;
+            const accentRGB = `${r1}, ${g1}, ${b1}`;
+            
+            document.documentElement.style.setProperty('--accent', accent);
+            document.documentElement.style.setProperty('--accent-rgb', accentRGB);
+            localStorage.setItem('cozyAccent', accent);
+        } catch (e) {
+            console.error("Could not extract accent color:", e);
+        }
+    };
+    img.onerror = () => {
+        console.error("Failed to load image for accent color extraction:", url);
     };
 }
 

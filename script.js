@@ -78,6 +78,10 @@ const elements = {
     toyDrawer: document.getElementById('toy-drawer'),
     toyDrawerTitle: document.getElementById('toy-drawer-title'),
     toyDrawerDesc: document.getElementById('toy-drawer-desc'),
+    // Corner Widgets & Presets
+    ambientIndicators: document.querySelectorAll('#ambient-indicators i'),
+    focusVisualizer: document.getElementById('focus-visualizer'),
+    presetTimes: document.querySelectorAll('.preset-time'),
 };
 
 
@@ -673,9 +677,11 @@ function updatePet() {
     if (state.timer.running) {
         elements.petDisplay.classList.add('active');
         elements.petStatus.innerText = "Focusing with you!";
+        elements.focusVisualizer.classList.add('visible');
     } else {
         elements.petDisplay.classList.remove('active');
         elements.petStatus.innerText = "Pet is resting...";
+        elements.focusVisualizer.classList.remove('visible');
     }
 }
 
@@ -686,86 +692,120 @@ const channels = {};
 let brownNoiseChannel = null;
 let brownNoisePlaying = false;
 
-function createNoise(type) {
-    const bufferSize = 2 * audioCtx.sampleRate;
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const output = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
-    }
-    const whiteNoise = audioCtx.createBufferSource();
-    whiteNoise.buffer = buffer;
-    whiteNoise.loop = true;
+const audioAssets = {
+    rain: 'https://raw.githubusercontent.com/bradtraversy/ambient-sound-mixer/master/sounds/rain.mp3',
+    wind: 'https://raw.githubusercontent.com/bradtraversy/ambient-sound-mixer/master/sounds/wind.mp3',
+    cafe: 'https://raw.githubusercontent.com/bradtraversy/ambient-sound-mixer/master/sounds/coffee%20shop.mp3',
+    fire: 'https://raw.githubusercontent.com/bradtraversy/ambient-sound-mixer/master/sounds/fireplace.mp3',
+    brown: 'https://upload.wikimedia.org/wikipedia/commons/4/47/Brown_noise.ogg'
+};
 
+function loadAmbientAudio(type, onReady) {
+    const audio = new Audio(audioAssets[type]);
+    audio.loop = true;
+    audio.crossOrigin = "anonymous";
+    
+    // Show loading state in UI
+    const iconContainer = document.querySelector(`.mixer-icon-container[data-type="${type}"]`);
+    const cornerIcon = document.querySelector(`#ambient-indicators i[data-type="${type}"]`);
+    
+    if (iconContainer) {
+        iconContainer.classList.add('loading');
+        iconContainer.innerHTML = '<i class="fas fa-spinner"></i>';
+    }
+    if (cornerIcon) cornerIcon.classList.add('loading-pulse');
+
+    audio.addEventListener('canplaythrough', () => {
+        if (iconContainer) {
+            iconContainer.classList.remove('loading');
+            // Restore original icon based on type
+            const iconMap = { rain: 'fa-cloud-rain', wind: 'fa-wind', cafe: 'fa-mug-hot', fire: 'fa-fire' };
+            iconContainer.innerHTML = `<i class="fas ${iconMap[type]}"></i>`;
+        }
+        if (cornerIcon) cornerIcon.classList.remove('loading-pulse');
+        if (onReady) onReady();
+    }, { once: true });
+
+    audio.addEventListener('error', (e) => {
+        console.error(`Audio error for ${type}:`, e);
+        if (iconContainer) {
+            iconContainer.classList.remove('loading');
+            iconContainer.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+        }
+    });
+
+    const source = audioCtx.createMediaElementSource(audio);
     const gainNode = audioCtx.createGain();
     gainNode.gain.value = 0;
 
-    // Filter for different "types" of noise
-    const filter = audioCtx.createBiquadFilter();
-    if (type === 'rain') {
-        filter.type = 'lowpass';
-        filter.frequency.value = 500;
-    } else if (type === 'wind') {
-        filter.type = 'bandpass';
-        filter.frequency.value = 800;
-        filter.Q.value = 1;
-    } else {
-        filter.type = 'lowpass';
-        filter.frequency.value = 300;
-    }
-
-    whiteNoise.connect(filter);
-    filter.connect(gainNode);
+    source.connect(gainNode);
     gainNode.connect(audioCtx.destination);
-    whiteNoise.start();
-
-    return gainNode;
+    
+    return { audio, gainNode };
 }
 
-function initMixer() {
+function updateAmbientIndicators() {
+    const sliders = document.querySelectorAll('.mixer-slider');
+    elements.ambientIndicators.forEach((icon, index) => {
+        const vol = parseInt(sliders[index].value);
+        icon.classList.toggle('active', vol > 0);
+        
+        if (sliders[index]) {
+            sliders[index].style.background = `linear-gradient(90deg, var(--accent) ${vol}%, rgba(255,255,255,0.1) ${vol}%)`;
+        }
+    });
+}
+
+async function initMixer() {
     const sliders = document.querySelectorAll('.mixer-slider');
     const types = ['rain', 'wind', 'cafe', 'fire'];
     const savedVols = JSON.parse(localStorage.getItem('cozyMixer')) || [0, 0, 0, 0];
     
-    sliders.forEach((slider, index) => {
-        const type = types[index];
-        // Create noise only once
-        if (!channels[type]) {
-            channels[type] = createNoise(type);
-        }
-
-        // Restore volume
-        const initialVol = savedVols[index];
-        slider.value = initialVol;
-        if (initialVol > 0) {
-            channels[type].gain.setTargetAtTime((initialVol / 100) * 0.4, audioCtx.currentTime, 0.1);
-        }
+    for (let i = 0; i < sliders.length; i++) {
+        const slider = sliders[i];
+        const type = types[i];
+        
+        slider.value = savedVols[i];
 
         slider.oninput = (e) => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            const vol = e.target.value / 100;
-            channels[type].gain.setTargetAtTime(vol * 0.4, audioCtx.currentTime, 0.1);
             
-            // Save volumes
+            const vol = e.target.value / 100;
+
+            if (!channels[type]) {
+                channels[type] = loadAmbientAudio(type, () => {
+                    channels[type].audio.play();
+                    channels[type].gainNode.gain.setTargetAtTime(vol * 0.5, audioCtx.currentTime, 0.1);
+                });
+            } else {
+                channels[type].gainNode.gain.setTargetAtTime(vol * 0.5, audioCtx.currentTime, 0.1);
+            }
+            
             const currentVols = Array.from(sliders).map(s => s.value);
             localStorage.setItem('cozyMixer', JSON.stringify(currentVols));
+            updateAmbientIndicators();
         };
-    });
+
+        if (savedVols[i] > 0) {
+            updateAmbientIndicators();
+        }
+    }
 }
 
 elements.soundBtn.addEventListener('click', () => {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     
     if (!brownNoiseChannel) {
-        brownNoiseChannel = createNoise('brown');
+        brownNoiseChannel = loadAmbientAudio('brown');
+        brownNoiseChannel.audio.play();
     }
     
     if (brownNoisePlaying) {
-        brownNoiseChannel.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
+        brownNoiseChannel.gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
         elements.soundBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
         brownNoisePlaying = false;
     } else {
-        brownNoiseChannel.gain.setTargetAtTime(0.3, audioCtx.currentTime, 0.1);
+        brownNoiseChannel.gainNode.gain.setTargetAtTime(0.4, audioCtx.currentTime, 0.1);
         elements.soundBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
         brownNoisePlaying = true;
     }
@@ -827,6 +867,24 @@ function init() {
         state.stars.shuffleOffset = (state.stars.shuffleOffset + 1) % constellations.length;
         localStorage.setItem('cozyStarsOffset', state.stars.shuffleOffset);
         renderStars();
+    });
+
+    // Timer presets
+    elements.presetTimes.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const mins = parseInt(btn.dataset.mins);
+            state.timer.initialMinutes = mins;
+            state.timer.totalSeconds = mins * 60;
+            state.timer.timeLeft = state.timer.totalSeconds;
+            updateTimerDisplay();
+            
+            elements.presetTimes.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            if (state.timer.running) {
+                elements.resetBtn.click(); // Reset if running to apply new time
+            }
+        });
     });
 }
 

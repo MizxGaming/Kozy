@@ -23,6 +23,20 @@
 </head>
 <body>
     <div class="bg-overlay"></div>
+
+    <!-- Top Left: Ambient Indicators -->
+    <div id="ambient-indicators" class="corner-widget top-left">
+        <i class="fas fa-cloud-rain" data-type="rain" title="Rain active"></i>
+        <i class="fas fa-wind" data-type="wind" title="Wind active"></i>
+        <i class="fas fa-mug-hot" data-type="cafe" title="Cafe active"></i>
+        <i class="fas fa-fire" data-type="fire" title="Fire active"></i>
+    </div>
+
+    <!-- Top Right: Focus Visualizer -->
+    <div id="focus-visualizer" class="corner-widget top-right">
+        <div class="visualizer-ring"></div>
+        <span class="visualizer-text">FOCUSING</span>
+    </div>
     
     <main class="dashboard">
         <!-- Widget: Clock, Greeting, Weather -->
@@ -87,10 +101,22 @@
                     <!-- Mixer Widget -->
                     <div id="widget-mixer" class="widget-content hidden">
                         <div class="mixer-container">
-                            <div class="mixer-row"><i class="fas fa-cloud-rain"></i><input type="range" class="mixer-slider" min="0" max="100" value="0"></div>
-                            <div class="mixer-row"><i class="fas fa-wind"></i><input type="range" class="mixer-slider" min="0" max="100" value="0"></div>
-                            <div class="mixer-row"><i class="fas fa-mug-hot"></i><input type="range" class="mixer-slider" min="0" max="100" value="0"></div>
-                            <div class="mixer-row"><i class="fas fa-fire"></i><input type="range" class="mixer-slider" min="0" max="100" value="0"></div>
+                            <div class="mixer-row">
+                                <div class="mixer-icon-container" data-type="rain"><i class="fas fa-cloud-rain"></i></div>
+                                <input type="range" class="mixer-slider" min="0" max="100" value="0">
+                            </div>
+                            <div class="mixer-row">
+                                <div class="mixer-icon-container" data-type="wind"><i class="fas fa-wind"></i></div>
+                                <input type="range" class="mixer-slider" min="0" max="100" value="0">
+                            </div>
+                            <div class="mixer-row">
+                                <div class="mixer-icon-container" data-type="cafe"><i class="fas fa-mug-hot"></i></div>
+                                <input type="range" class="mixer-slider" min="0" max="100" value="0">
+                            </div>
+                            <div class="mixer-row">
+                                <div class="mixer-icon-container" data-type="fire"><i class="fas fa-fire"></i></div>
+                                <input type="range" class="mixer-slider" min="0" max="100" value="0">
+                            </div>
                         </div>
                     </div>
 
@@ -137,6 +163,13 @@
                     <div class="time" id="time" contenteditable="true" title="Click to edit minutes">25:00</div>
                     <div class="edit-hint">edit</div>
                 </div>
+            </div>
+
+            <div class="timer-presets">
+                <button class="preset-time" data-mins="15">15</button>
+                <button class="preset-time" data-mins="25">25</button>
+                <button class="preset-time" data-mins="45">45</button>
+                <button class="preset-time" data-mins="60">60</button>
             </div>
 
             <div class="controls">

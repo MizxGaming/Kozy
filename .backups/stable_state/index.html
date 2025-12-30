@@ -126,24 +126,10 @@
 
                     <!-- Stars Widget -->
                     <div id="widget-stars" class="widget-content hidden">
-                        <div id="stars-main-view" class="stars-view">
-                            <canvas id="stars-canvas"></canvas>
-                            <div class="stars-actions">
-                                <button id="shuffle-stars" class="widget-action-btn" title="Next Constellation"><i class="fas fa-random"></i></button>
-                                <button id="stars-info-btn" class="widget-action-btn" title="Star Hierarchy"><i class="fas fa-info-circle"></i></button>
-                            </div>
-                        </div>
-                        
-                        <!-- Stars Hierarchy View (Takeover) -->
-                        <div id="stars-hierarchy-view" class="stars-view hidden-outward">
-                            <div class="hierarchy-header">
-                                <button id="close-stars-hierarchy" class="icon-btn-small" title="Back"><i class="fas fa-arrow-left"></i></button>
-                                <h4>Star Hierarchy</h4>
-                            </div>
-                            <p class="modal-subtitle">1 star = 5 minutes of focus</p>
-                            <div id="stars-hierarchy-list" class="hierarchy-list">
-                                <!-- Dynamically populated -->
-                            </div>
+                        <canvas id="stars-canvas"></canvas>
+                        <div class="stars-actions">
+                            <button id="shuffle-stars" class="widget-action-btn" title="Next Constellation"><i class="fas fa-random"></i></button>
+                            <button id="stars-info-btn" class="widget-action-btn" title="Star Hierarchy"><i class="fas fa-info-circle"></i></button>
                         </div>
                     </div>
 
@@ -232,6 +218,20 @@
         <button id="settings-btn" class="action-btn" title="Customize Theme">
             <i class="fas fa-cog"></i>
         </button>
+    </div>
+
+    <!-- Stars Hierarchy Window -->
+    <div id="stars-hierarchy-window" class="modal hidden">
+        <div class="modal-content stars-window-content">
+            <button id="close-stars-drawer" class="close-modal">&times;</button>
+            <div class="drawer-header">
+                <h2>Star Hierarchy</h2>
+            </div>
+            <p class="modal-subtitle">1 star = 5 minutes of focus</p>
+            <div id="stars-hierarchy-list" class="hierarchy-list">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
     </div>
 
     <!-- About Modal -->

@@ -77,9 +77,8 @@ const elements = {
     starsCanvas: document.getElementById('stars-canvas'),
     shuffleStarsBtn: document.getElementById('shuffle-stars'),
     starsInfoBtn: document.getElementById('stars-info-btn'),
-    starsMainView: document.getElementById('stars-main-view'),
-    starsHierarchyView: document.getElementById('stars-hierarchy-view'),
-    closeStarsHierarchyBtn: document.getElementById('close-stars-hierarchy'),
+    starsHierarchyWindow: document.getElementById('stars-hierarchy-window'),
+    closeStarsDrawer: document.getElementById('close-stars-drawer'),
     starsHierarchyList: document.getElementById('stars-hierarchy-list'),
     petDisplay: document.getElementById('pet-display'),
     petStatus: document.getElementById('pet-status'),
@@ -474,27 +473,15 @@ function populateStarsHierarchy() {
 }
 
 // --- Stars Hierarchy Window ---
-// --- Stars Hierarchy Takeover ---
-function toggleStarsHierarchy(show) {
-    elements.toysPanel.classList.toggle('expanded', show);
-    elements.historyPanel.classList.toggle('collapsed', show);
+function closeStarsWindow() {
+    const win = elements.starsHierarchyWindow;
+    if (win.classList.contains('hidden')) return;
     
-    if (show) {
-        populateStarsHierarchy();
-        // Main view fades inward, Hierarchy comes from outward
-        elements.starsMainView.classList.add('hidden-inward');
-        elements.starsMainView.classList.remove('hidden-outward');
-        
-        elements.starsHierarchyView.classList.remove('hidden-inward');
-        elements.starsHierarchyView.classList.remove('hidden-outward');
-    } else {
-        // Hierarchy fades inward, Main view comes from outward
-        elements.starsHierarchyView.classList.add('hidden-inward');
-        elements.starsHierarchyView.classList.remove('hidden-outward');
-        
-        elements.starsMainView.classList.remove('hidden-inward');
-        elements.starsMainView.classList.remove('hidden-outward');
-    }
+    win.classList.add('closing');
+    setTimeout(() => {
+        win.classList.add('hidden');
+        win.classList.remove('closing');
+    }, 260); // Match new 0.25s animation
 }
 
 function populateStarsHierarchy() {
@@ -534,14 +521,26 @@ function populateStarsHierarchy() {
     });
 }
 
-elements.starsInfoBtn.addEventListener('click', () => toggleStarsHierarchy(true));
-elements.closeStarsHierarchyBtn.addEventListener('click', () => toggleStarsHierarchy(false));
+elements.starsInfoBtn.addEventListener('click', () => {
+    populateStarsHierarchy();
+    elements.starsHierarchyWindow.classList.remove('hidden');
+    elements.toyDrawer.classList.remove('open'); // Hide general info
+});
+
+elements.closeStarsDrawer.addEventListener('click', closeStarsWindow);
+
+// Close on background click
+elements.starsHierarchyWindow.addEventListener('click', (e) => {
+    if (e.target === elements.starsHierarchyWindow) {
+        closeStarsWindow();
+    }
+});
 
 window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         elements.settingsModal.classList.add('hidden');
         elements.aboutModal.classList.add('hidden');
-        toggleStarsHierarchy(false);
+        closeStarsWindow();
         elements.toyDrawer.classList.remove('open');
     }
 });
@@ -644,7 +643,7 @@ function initWidgets() {
         });
 
         // Close drawers when switching
-        toggleStarsHierarchy(false);
+        closeStarsWindow();
         elements.toyDrawer.classList.remove('open');
         const infoIcon = elements.toyInfoBtn.querySelector('i');
         if (infoIcon) infoIcon.className = 'fas fa-question-circle';
@@ -660,7 +659,7 @@ function initWidgets() {
     // Info button toggle
     elements.toyInfoBtn.addEventListener('click', () => {
         elements.toyDrawer.classList.toggle('open');
-        toggleStarsHierarchy(false); // Close takeover
+        closeStarsWindow(); // Close other window
         const icon = elements.toyInfoBtn.querySelector('i');
         if (elements.toyDrawer.classList.contains('open')) {
             icon.className = 'fas fa-times-circle';

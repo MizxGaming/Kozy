@@ -306,23 +306,6 @@ body {
     transform: translateZ(150px) scale(1.1);
     filter: blur(8px);
 }
-    flex: 0 0 0px;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-top: -20px;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(100px) scale(0.95); /* Roll down and shrink */
-}
-
-.panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    border-bottom: 1px solid var(--glass-border);
-    padding-bottom: 8px;
-}
 
 /* Settings Close Button */
 #close-settings {
@@ -559,6 +542,7 @@ body {
     align-items: center;
     justify-content: center;
     height: 100%;
+    width: 100%;
 }
 
 .pulse-blob {
@@ -567,7 +551,8 @@ body {
     background: var(--accent);
     border-radius: 50%;
     filter: blur(30px);
-    opacity: 0.4;
+    opacity: 0.6;
+    box-shadow: 0 0 40px var(--accent);
     animation: deep-breathe 4s infinite ease-in-out;
 }
 
@@ -967,39 +952,52 @@ body {
     align-items: center;
     margin-bottom: 30px;
     width: 100%;
+    isolation: isolate; /* Prevent filter spill to parent glass panel */
+}
+
+.progress-ring {
+    overflow: visible;
+    pointer-events: none;
+    isolation: isolate;
 }
 
 .progress-ring__circle {
     transition: stroke-dashoffset 0.35s linear;
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
+    stroke-linecap: round;
 }
 
 .progress-ring__circle-bg {
     transition: stroke 0.5s ease;
     opacity: 0.8;
+    stroke-linecap: round;
 }
 
 .progress-ring__thumb {
-    transition: all 0.3s ease, cx 0.35s linear, cy 0.35s linear;
+    transition: transform 0.35s linear, fill 0.3s ease, filter 0.3s ease;
     fill: rgba(255, 255, 255, 0.3); /* Darker when dormant */
     filter: none;
+    will-change: transform, filter;
+    /* Already centered at (150,150) in SVG, now rotate and push out */
+    transform: rotate(var(--thumb-angle, 0deg)) translateY(-140px);
+    transform-origin: center; /* Refers to SVG center when cx/cy are 150 */
 }
 
 .progress-ring__thumb.active {
     fill: white;
-    filter: drop-shadow(0 0 10px white);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
 }
 
 .progress-ring__thumb.pulsing {
     fill: white;
-    filter: drop-shadow(0 0 8px white);
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.7));
     animation: thumbPulse 3s ease-in-out infinite;
 }
 
 @keyframes thumbPulse {
-    0%, 100% { filter: drop-shadow(0 0 5px white); }
-    50% { filter: drop-shadow(0 0 15px white); }
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6)); }
+    50% { filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.9)); }
 }
 
 .time-container {

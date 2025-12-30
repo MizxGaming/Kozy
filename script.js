@@ -176,15 +176,9 @@ function updateTimerDisplay() {
     const offset = circumference - (percent / 100) * circumference;
     elements.ring.style.strokeDashoffset = offset;
 
-    // Thumb position: starts at top (-90 degrees)
-    const angle = (percent / 100) * 360 - 90;
-    const radius = 140;
-    const cx = 150, cy = 150;
-    const x = cx + radius * Math.cos(angle * Math.PI / 180);
-    const y = cy + radius * Math.sin(angle * Math.PI / 180);
-    
-    elements.thumb.setAttribute('cx', x);
-    elements.thumb.setAttribute('cy', y);
+    // Thumb position: rotation based on percentage
+    const angle = (percent / 100) * 360;
+    elements.thumb.style.setProperty('--thumb-angle', `${angle}deg`);
 }
 
 function finishTimer() {

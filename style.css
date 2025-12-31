@@ -283,7 +283,7 @@ body {
 /* Stars Takeover Views */
 .stars-view {
     position: absolute;
-    top: 20px;
+    top: 50px;
     left: 20px;
     right: 20px;
     bottom: 20px;
@@ -524,6 +524,7 @@ body {
     align-items: center;
     justify-content: center;
     height: 100%;
+    padding-top: 20px;
 }
 
 .pet-character {

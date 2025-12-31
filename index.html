@@ -149,9 +149,27 @@
 
                     <!-- Pet Widget -->
                     <div id="widget-pet" class="widget-content hidden">
-                        <div class="pet-container">
-                            <div class="pet-character" id="pet-display"><i class="fas fa-robot"></i></div>
-                            <p id="pet-status">Pet is resting...</p>
+                        <div id="pet-main-view" class="stars-view">
+                            <div class="pet-container">
+                                <div class="pet-character" id="pet-display"><i class="fas fa-robot"></i></div>
+                                <h4 id="pet-name" style="margin: 10px 0 5px 0; color: var(--accent);">Rusty</h4>
+                                <p id="pet-status">Pet is resting...</p>
+                            </div>
+                            <div class="stars-actions">
+                                <button id="pet-info-btn" class="widget-action-btn" title="Pet Collection"><i class="fas fa-paw"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Pet Hierarchy View (Takeover) -->
+                        <div id="pet-hierarchy-view" class="stars-view hidden-outward">
+                            <div class="hierarchy-header">
+                                <button id="close-pet-hierarchy" class="icon-btn-small" title="Back"><i class="fas fa-arrow-left"></i></button>
+                                <h4>Pet Collection</h4>
+                            </div>
+                            <p class="modal-subtitle">New pets arrive as you focus today</p>
+                            <div id="pet-hierarchy-list" class="hierarchy-list">
+                                <!-- Dynamically populated -->
+                            </div>
                         </div>
                     </div>
 

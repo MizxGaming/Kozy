@@ -497,9 +497,15 @@ body {
     transition: all 0.2s;
 }
 
-.hierarchy-item.unlocked {
+.hierarchy-item.unlocked:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.hierarchy-item.selected {
     border-color: var(--accent);
-    background: rgba(var(--accent-rgb), 0.1);
+    background: rgba(var(--accent-rgb), 0.2);
+    box-shadow: inset 0 0 10px rgba(var(--accent-rgb), 0.3);
 }
 
 .hierarchy-name {

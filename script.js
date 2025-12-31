@@ -7,6 +7,7 @@ const state = {
         bg: localStorage.getItem('cozyBg') || 'wallpapers/default.jpg',
         activeWidget: localStorage.getItem('cozyActiveWidget') || 'mixer',
         dynamicColors: true,
+        selectedPet: localStorage.getItem('cozySelectedPet') || null,
     },
     timer: {
         totalSeconds: 25 * 60,
@@ -959,12 +960,26 @@ function updatePet() {
     const today = getLocalDate();
     const totalMins = state.sessions.filter(s => s.date === today).reduce((acc, curr) => acc + curr.minutes, 0);
     
-    // Find the highest unlocked pet
-    let activePet = petHierarchy[0];
+    // Determine the highest unlocked pet automatically
+    let highestUnlocked = petHierarchy[0];
     for (let i = petHierarchy.length - 1; i >= 0; i--) {
         if (totalMins >= petHierarchy[i].mins) {
-            activePet = petHierarchy[i];
+            highestUnlocked = petHierarchy[i];
             break;
+        }
+    }
+
+    // Use selected pet if it's unlocked, otherwise use the highest unlocked
+    let activePet = highestUnlocked;
+    if (state.settings.selectedPet) {
+        const selected = petHierarchy.find(p => p.name === state.settings.selectedPet);
+        if (selected && totalMins >= selected.mins) {
+            activePet = selected;
+        } else {
+            // Reset selection if the selected pet is no longer "available" (e.g. new day)
+            state.settings.selectedPet = null;
+            localStorage.removeItem('cozySelectedPet');
+            activePet = highestUnlocked;
         }
     }
 
@@ -1014,10 +1029,23 @@ function populatePetHierarchy() {
     
     elements.petHierarchyList.innerHTML = '';
     
+    // Determine which pet is currently active to show "Selected" status
+    let highestUnlocked = petHierarchy[0];
+    for (let i = petHierarchy.length - 1; i >= 0; i--) {
+        if (totalMins >= petHierarchy[i].mins) {
+            highestUnlocked = petHierarchy[i];
+            break;
+        }
+    }
+    const currentActiveName = state.settings.selectedPet || highestUnlocked.name;
+
     petHierarchy.forEach(pet => {
         const isUnlocked = totalMins >= pet.mins;
+        const isSelected = isUnlocked && currentActiveName === pet.name;
+        
         const item = document.createElement('div');
-        item.className = `hierarchy-item ${isUnlocked ? 'unlocked' : ''}`;
+        item.className = `hierarchy-item ${isUnlocked ? 'unlocked' : ''} ${isSelected ? 'selected' : ''}`;
+        if (isUnlocked) item.style.cursor = 'pointer';
         
         item.innerHTML = `
             <div style="display: flex; align-items: center; gap: 15px;">
@@ -1025,15 +1053,25 @@ function populatePetHierarchy() {
                     <i class="fas ${pet.icon}"></i>
                 </div>
                 <div>
-                    <div class="hierarchy-name">${pet.name}</div>
+                    <div class="hierarchy-name">${pet.name} ${isSelected ? '<small>(Active)</small>' : ''}</div>
                     <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5)">${pet.desc}</div>
                 </div>
             </div>
             <div class="hierarchy-info">
                 <div>${pet.mins}m</div>
-                <div style="font-size: 0.75rem; opacity: 0.8">${isUnlocked ? 'Unlocked' : 'Locked'}</div>
+                <div style="font-size: 0.75rem; opacity: 0.8">${isUnlocked ? (isSelected ? 'Selected' : 'Click to use') : 'Locked'}</div>
             </div>
         `;
+
+        if (isUnlocked) {
+            item.addEventListener('click', () => {
+                state.settings.selectedPet = pet.name;
+                localStorage.setItem('cozySelectedPet', pet.name);
+                updatePet();
+                populatePetHierarchy();
+            });
+        }
+
         elements.petHierarchyList.appendChild(item);
     });
 }

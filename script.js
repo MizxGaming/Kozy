@@ -45,7 +45,7 @@ const elements = {
     todoList: document.getElementById('todo-list'),
     // Calendar & Analysis
     historyPanel: document.querySelector('.history-panel'),
-    toysPanel: document.querySelector('.toys-panel'),
+    bitsPanel: document.querySelector('.bits-panel'),
     calendarGrid: document.getElementById('mini-calendar'),
     todayFocus: document.getElementById('today-focus'),
     calendarView: document.getElementById('calendar-view'),
@@ -90,10 +90,10 @@ const elements = {
     closePetHierarchyBtn: document.getElementById('close-pet-hierarchy'),
     petHierarchyList: document.getElementById('pet-hierarchy-list'),
     petInfoBtn: document.getElementById('pet-info-btn'),
-    toyInfoBtn: document.getElementById('toy-info-btn'),
-    toyDrawer: document.getElementById('toy-drawer'),
-    toyDrawerTitle: document.getElementById('toy-drawer-title'),
-    toyDrawerDesc: document.getElementById('toy-drawer-desc'),
+    bitInfoBtn: document.getElementById('bit-info-btn'),
+    bitDrawer: document.getElementById('bit-drawer'),
+    bitDrawerTitle: document.getElementById('bit-drawer-title'),
+    bitDrawerDesc: document.getElementById('bit-drawer-desc'),
     // Corner Widgets & Presets
     ambientIndicators: document.querySelectorAll('#ambient-indicators i'),
     focusVisualizer: document.getElementById('focus-visualizer'),
@@ -301,7 +301,7 @@ function toggleHistoryView() {
     
     // Toggle classes for panel expansion
     elements.historyPanel.classList.toggle('expanded', isAnalysis);
-    elements.toysPanel.classList.toggle('collapsed', isAnalysis);
+    elements.bitsPanel.classList.toggle('collapsed', isAnalysis);
     
     // Depth animation logic
     if (isAnalysis) {
@@ -506,7 +506,7 @@ function populateStarsHierarchy() {
 // --- Stars Hierarchy Window ---
 // --- Stars Hierarchy Takeover ---
 function toggleStarsHierarchy(show) {
-    elements.toysPanel.classList.toggle('expanded', show);
+    elements.bitsPanel.classList.toggle('expanded', show);
     elements.historyPanel.classList.toggle('collapsed', show);
     
     if (show) {
@@ -573,7 +573,7 @@ window.addEventListener('keydown', (e) => {
         elements.aboutModal.classList.add('hidden');
         toggleStarsHierarchy(false);
         togglePetHierarchy(false);
-        elements.toyDrawer.classList.remove('open');
+        elements.bitDrawer.classList.remove('open');
     }
 });
 
@@ -635,18 +635,18 @@ elements.bgUpload.addEventListener('change', (e) => {
 
 
 // --- MODULAR WIDGETS ---
-const toyDescriptions = {
+const bitDescriptions = {
     mixer: { title: "Zen Mixer", desc: "Craft your perfect ambient atmosphere by blending rain, wind, cafe, and fire sounds." },
     stars: { title: "Focus Stars", desc: "Build your own constellation; a new star is born for every 5 minutes of focused work." },
     pet: { title: "Focus Pet", desc: "A tiny robot companion that stays active while you work and rests when you're done." },
     pulse: { title: "Focus Pulse", desc: "A gentle visual rhythm designed to help you synchronize your breathing and stay calm." }
 };
 
-function updateToyDrawer() {
-    const data = toyDescriptions[state.settings.activeWidget];
+function updateBitDrawer() {
+    const data = bitDescriptions[state.settings.activeWidget];
     if (data) {
-        elements.toyDrawerTitle.innerText = data.title;
-        elements.toyDrawerDesc.innerText = data.desc;
+        elements.bitDrawerTitle.innerText = data.title;
+        elements.bitDrawerDesc.innerText = data.desc;
     }
 }
 
@@ -676,8 +676,8 @@ function initWidgets() {
 
         // Close drawers when switching
         toggleStarsHierarchy(false);
-        elements.toyDrawer.classList.remove('open');
-        const infoIcon = elements.toyInfoBtn.querySelector('i');
+        elements.bitDrawer.classList.remove('open');
+        const infoIcon = elements.bitInfoBtn.querySelector('i');
         if (infoIcon) infoIcon.className = 'fas fa-question-circle';
 
         // Trigger specific renders
@@ -685,15 +685,15 @@ function initWidgets() {
         if (target === 'pet') updatePet();
 
         // Update drawer content
-        updateToyDrawer();
+        updateBitDrawer();
     });
 
     // Info button toggle
-    elements.toyInfoBtn.addEventListener('click', () => {
-        elements.toyDrawer.classList.toggle('open');
+    elements.bitInfoBtn.addEventListener('click', () => {
+        elements.bitDrawer.classList.toggle('open');
         toggleStarsHierarchy(false); // Close takeover
-        const icon = elements.toyInfoBtn.querySelector('i');
-        if (elements.toyDrawer.classList.contains('open')) {
+        const icon = elements.bitInfoBtn.querySelector('i');
+        if (elements.bitDrawer.classList.contains('open')) {
             icon.className = 'fas fa-times-circle';
         } else {
             icon.className = 'fas fa-question-circle';
@@ -1015,7 +1015,7 @@ function updatePet() {
 }
 
 function togglePetHierarchy(show) {
-    elements.toysPanel.classList.toggle('expanded', show);
+    elements.bitsPanel.classList.toggle('expanded', show);
     elements.historyPanel.classList.toggle('collapsed', show);
     
     if (show) {

@@ -53,6 +53,8 @@ body {
     flex-direction: column;
     align-items: center; /* Back to center */
     text-align: center;
+    position: relative;
+    z-index: 10;
 }
 
 .clock {
@@ -124,10 +126,6 @@ body {
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--text-secondary);
-}
-
-.toys-panel {
-    position: relative;
     z-index: 2;
 }
 
@@ -258,6 +256,7 @@ body {
     transform-origin: top;
     position: relative;
     perspective: 1000px; /* Crucial for 3D effect */
+    overflow: hidden;
 }
 
 .toys-panel.expanded {
@@ -283,7 +282,7 @@ body {
 /* Stars Takeover Views */
 .stars-view {
     position: absolute;
-    top: 50px;
+    top: 70px;
     left: 20px;
     right: 20px;
     bottom: 20px;
@@ -432,6 +431,7 @@ body {
     height: 100%;
     display: block;
     border-radius: 12px;
+    pointer-events: none;
 }
 
 .stars-actions {

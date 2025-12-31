@@ -1,45 +1,30 @@
-# Kozy: A Minimalist Focus Space
+# Kozy: A Minimalist Focus Space 🌙
 
-Kozy is a thoughtfully designed dashboard 🌙 created to transform productivity into a serene and focused experience. Developed during a late-night session to explore the intersection of aesthetics and focus, it provides a personalized sanctuary for work, study, or relaxation.
+**Kozy** is an aesthetic focus sanctuary designed for deep work. It combines minimalist productivity tools with immersive ambient elements to create a productive yet serene environment.
 
-## Features
+## ✨ Features
+- **Productivity**: Circular Countdown Timer, persistent To-Do list, and 28-day Focus History with hourly analysis.
+- **Kozy Bits**: A modular bit system featuring a Zen Mixer (local high-fidelity audio), Star Constellations (Canvas), and an Evolving Focus Pet.
+- **Aesthetics**: Dynamic wallpaper-based theming, custom uploads with compression, and a high-performance glassmorphism UI.
 
-### Core Dashboard
-- **Dynamic Interface**: A centered clock and personalized greeting that adapt to the time of day 🕒.
-- **Adjustable Timer**: A countdown timer with a visual progress ring and intuitive controls ⏱️.
-- **Persistent Tasks**: A simple to-do list that ensures your goals remain in sight ✅.
+## 🛠️ How it Works (For Devs)
 
-### Focus Analytics
-- **Consistency Tracking**: A visual calendar displaying your focus history over the last 28 days 📅.
-- **Hourly Insights**: Toggle from the calendar to a detailed 24-hour chart to understand your peak productivity hours 📊.
-- **Session Records**: A clear history of focus blocks with task-specific labels 📝.
+Kozy is built with a **modular, no-build architecture** using native ES Modules. This ensures the codebase remains maintainable and scalable without requiring a build step.
 
-### Interactive Widgets
-The dashboard includes a collection of minimalist toys to accompany your focus sessions 🧸:
-- **Zen Mixer**: A custom soundscape generator with rain, wind, cafe, and fire ambient noises 🎛️.
-- **Focus Stars**: A constellation generator that adds a new star for every five minutes of work ✨.
-- **Focus Pet**: A small companion that remains active during focus sessions and rests when you are finished 🤖.
-- **Focus Pulse**: A gentle visual rhythm designed to help synchronize breathing and maintain calm 🌀.
-- **Info Drawer**: A slide-out panel providing brief descriptions of each interactive element ℹ️.
+### **Architecture & State**
+- **Modular System**: The logic is split into `core/` (state, DOM, utils), `features/` (timer, history, todo), `bits/` (mixer, stars, pet), and `ui/` (theme, navigation).
+- **State Management**: A centralized `state` object (`js/core/state.js`) serves as the single source of truth, synchronized with `localStorage` for full persistence.
 
-### Personalization
-- **Intelligent Theming**: The interface automatically extracts accent colors from your wallpaper for a cohesive look 🎨.
-- **Custom Environments**: Select from curated backdrops or upload your own, with automatic image optimization for performance 🖼️.
-- **Brown Noise Toggle**: A quick-access button for immersive deep-focus audio 🔊.
+### **Technical Highlights**
+- **Audio Engine**: Powered by the **Web Audio API** (`js/bits/mixer.js`), allowing for seamless looping, volume blending, and efficient local asset management.
+- **Dynamic Theming**: Wallpapers are processed via a hidden Canvas to extract dominant colors, which are then injected as CSS variables (`--accent`) to retheme the UI instantly.
+- **Canvas Rendering**: The **Focus Stars** bit uses an optimized HTML5 Canvas engine to render twinkling backgrounds and procedural constellations without impacting DOM performance.
+- **Timer Logic**: Uses SVG `stroke-dashoffset` for the progress ring and CSS variables for the orbiting thumb rotation to ensure smooth, hardware-accelerated movement.
 
-## Technical Stack
-- **Frontend**: HTML5, CSS3 (Grid & Flexbox), and Vanilla JavaScript.
-- **Audio Architecture**: Web Audio API for procedural sound generation.
-- **Data Persistence**: LocalStorage for client-side data management and privacy.
-- **Design Language**: A glassmorphism interface featuring Space Mono and Quicksand typography.
-
-## Origin
-This project began as an experiment in **vibe coding** 🪄—a way to pass the time by building something both functional and aesthetically pleasing. The goal was to create a seamless environment where productivity feels natural rather than forced ☕.
-
-## Getting Started
+## 🚀 Getting Started
 1. Clone the repository.
 2. Open `index.html` in any modern web browser.
-3. Set your preferences and begin your session.
+3. Kozy works entirely client-side—no server required.
 
 ---
-*Created during a late-night vibe coding session to explore the intersection of productivity and aesthetics 🪄.*
+*Created as an experiment in **vibe coding** 🪄—where productivity feels natural, not forced.*

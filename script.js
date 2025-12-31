@@ -824,11 +824,16 @@ function renderStars() {
 
     function draw() {
         const rect = canvas.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) {
+            starAnimFrame = requestAnimationFrame(draw);
+            return;
+        }
+
         const dpr = window.devicePixelRatio || 1;
         
-        if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
+        if (canvas.width !== Math.floor(rect.width * dpr) || canvas.height !== Math.floor(rect.height * dpr)) {
+            canvas.width = Math.floor(rect.width * dpr);
+            canvas.height = Math.floor(rect.height * dpr);
             ctx.scale(dpr, dpr);
         }
         
@@ -871,9 +876,13 @@ function renderStars() {
              minY = Math.min(minY, p[1]); maxY = Math.max(maxY, p[1]);
         });
         
-        const cW = maxX - minX;
-        const cH = maxY - minY;
-        const scale = Math.min((w - 60) / (cW * w / 100), (h - 80) / (cH * h / 100));
+        const cW = Math.max(maxX - minX, 1);
+        const cH = Math.max(maxY - minY, 1);
+        
+        // Robust scale calculation
+        const availW = Math.max(w - 60, 20);
+        const availH = Math.max(h - 80, 20);
+        const scale = Math.min(availW / (cW * w / 100 || 1), availH / (cH * h / 100 || 1));
         
         const centerX = w / 2;
         const centerY = h / 2 - 10;
@@ -1087,17 +1096,16 @@ let brownNoiseChannel = null;
 let brownNoisePlaying = false;
 
 const audioAssets = {
-    rain: 'https://raw.githubusercontent.com/bradtraversy/ambient-sound-mixer/master/sounds/rain.mp3',
-    wind: 'https://raw.githubusercontent.com/bradtraversy/ambient-sound-mixer/master/sounds/wind.mp3',
-    cafe: 'https://raw.githubusercontent.com/bradtraversy/ambient-sound-mixer/master/sounds/coffee%20shop.mp3',
-    fire: 'https://raw.githubusercontent.com/bradtraversy/ambient-sound-mixer/master/sounds/fireplace.mp3',
+    rain: 'audio/rain.mp3',
+    wind: 'audio/wind.mp3',
+    cafe: 'audio/cafe.mp3',
+    fire: 'audio/fireplace.mp3',
     brown: 'https://upload.wikimedia.org/wikipedia/commons/4/47/Brown_noise.ogg'
 };
 
 function loadAmbientAudio(type, onReady) {
     const audio = new Audio(audioAssets[type]);
     audio.loop = true;
-    audio.crossOrigin = "anonymous";
     
     // Show loading state in UI
     const iconContainer = document.querySelector(`.mixer-icon-container[data-type="${type}"]`);

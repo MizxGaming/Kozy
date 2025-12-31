@@ -292,6 +292,10 @@ body {
     backface-visibility: hidden;
 }
 
+.toys-panel.expanded .stars-view {
+    top: 20px;
+}
+
 .stars-view.hidden-inward {
     opacity: 0 !important;
     pointer-events: none;

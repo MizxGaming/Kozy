@@ -57,9 +57,10 @@ export function togglePetHierarchy(show) {
         populatePetHierarchy();
         elements.petMainView.classList.add('hidden-inward');
         elements.petHierarchyView.classList.remove('hidden-outward');
+        elements.petHierarchyView.classList.remove('hidden-inward');
     } else {
-        elements.petHierarchyView.classList.add('hidden-inward');
-        elements.petMainView.classList.remove('hidden-outward');
+        elements.petHierarchyView.classList.add('hidden-outward');
+        elements.petMainView.classList.remove('hidden-inward');
     }
 }
 

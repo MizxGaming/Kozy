@@ -134,9 +134,10 @@ export function toggleStarsHierarchy(show) {
         populateStarsHierarchy();
         elements.starsMainView.classList.add('hidden-inward');
         elements.starsHierarchyView.classList.remove('hidden-outward');
+        elements.starsHierarchyView.classList.remove('hidden-inward');
     } else {
-        elements.starsHierarchyView.classList.add('hidden-inward');
-        elements.starsMainView.classList.remove('hidden-outward');
+        elements.starsHierarchyView.classList.add('hidden-outward');
+        elements.starsMainView.classList.remove('hidden-inward');
     }
 }
 

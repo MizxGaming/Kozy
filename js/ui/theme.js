@@ -70,25 +70,94 @@ function updateAccentColor(url) {
     img.src = url;
     img.onload = () => {
         try {
+            // Robust Averaging: Sample a 50x50 grid instead of relying on browser downscaling
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 1, canvas.height = 1;
-            ctx.drawImage(img, 0, 0, 1, 1);
-            const data = ctx.getImageData(0, 0, 1, 1).data;
-            const [r, g, b] = data;
+            const sampleSize = 50;
+            canvas.width = sampleSize;
+            canvas.height = sampleSize;
             
-            const r1 = Math.min(r + 80, 255);
-            const g1 = Math.min(g + 80, 255);
-            const b1 = Math.min(b + 80, 255);
+            // Draw image scaled to 50x50
+            ctx.drawImage(img, 0, 0, sampleSize, sampleSize);
+            const data = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
             
-            const accent = `rgb(${r1}, ${g1}, ${b1})`;
+            let rSum = 0, gSum = 0, bSum = 0;
+            const totalPixels = sampleSize * sampleSize;
+
+            for (let i = 0; i < totalPixels; i++) {
+                rSum += data[i * 4];
+                gSum += data[i * 4 + 1];
+                bSum += data[i * 4 + 2];
+            }
+
+            const r = Math.round(rSum / totalPixels);
+            const g = Math.round(gSum / totalPixels);
+            const b = Math.round(bSum / totalPixels);
+            
+            // Convert to HSL
+            let [h, s, l] = rgbToHsl(r, g, b);
+            
+            // Adjust for aesthetic UI accent
+            // 1. Boost saturation to avoid grays (at least 60%, max 90%)
+            s = Math.max(0.6, Math.min(s, 0.9)); 
+            
+            // 2. Fix lightness for readability (sweet spot around 75-80%)
+            l = 0.75; 
+
+            // Convert back to RGB
+            const [newR, newG, newB] = hslToRgb(h, s, l);
+            
+            const accent = `rgb(${newR}, ${newG}, ${newB})`;
             document.documentElement.style.setProperty('--accent', accent);
-            document.documentElement.style.setProperty('--accent-rgb', `${r1}, ${g1}, ${b1}`);
+            document.documentElement.style.setProperty('--accent-rgb', `${newR}, ${newG}, ${newB}`);
             localStorage.setItem('cozyAccent', accent);
         } catch (e) {
             console.error("Could not extract accent color:", e);
         }
     };
+}
+
+// --- HSL Helpers ---
+function rgbToHsl(r, g, b) {
+    r /= 255, g /= 255, b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+        h = s = 0; // achromatic
+    } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    return [h, s, l];
+}
+
+function hslToRgb(h, s, l) {
+    let r, g, b;
+    if (s === 0) {
+        r = g = b = l; // achromatic
+    } else {
+        const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
 function handleWallpaperUpload(e) {
